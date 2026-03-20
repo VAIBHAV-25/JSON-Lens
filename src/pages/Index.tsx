@@ -1,17 +1,25 @@
-import { useJsonStore, JsonTab } from '@/stores/jsonStore';
+import { useJsonStore, JsonTab } from "@/stores/jsonStore";
 import {
-  Braces, GitCompareArrows, Network, FileCode2, Code2,
-  Sun, Moon, CheckCircle2, AlertCircle, Keyboard,
-} from 'lucide-react';
-import { useState, useEffect, lazy, Suspense, useMemo } from 'react';
-import JsonInput from '@/components/json/JsonInput';
-import JsonTreeView from '@/components/json/JsonTreeView';
-import { computeStats, JsonStats } from '@/utils/jsonUtils';
+  Braces,
+  GitCompareArrows,
+  Network,
+  FileCode2,
+  Code2,
+  Sun,
+  Moon,
+  CheckCircle2,
+  AlertCircle,
+  Keyboard,
+} from "lucide-react";
+import { useState, useEffect, lazy, Suspense, useMemo } from "react";
+import JsonInput from "@/components/json/JsonInput";
+import JsonTreeView from "@/components/json/JsonTreeView";
+import { computeStats } from "@/utils/jsonUtils";
 
-const JsonDiff   = lazy(() => import('@/components/json/JsonDiff'));
-const JsonGraph  = lazy(() => import('@/components/json/JsonGraph'));
-const JsonSchema = lazy(() => import('@/components/json/JsonSchema'));
-const JsonTypes  = lazy(() => import('@/components/json/JsonTypes'));
+const JsonDiff = lazy(() => import("@/components/json/JsonDiff"));
+const JsonGraph = lazy(() => import("@/components/json/JsonGraph"));
+const JsonSchema = lazy(() => import("@/components/json/JsonSchema"));
+const JsonTypes = lazy(() => import("@/components/json/JsonTypes"));
 
 interface TabDef {
   id: JsonTab;
@@ -22,21 +30,43 @@ interface TabDef {
 }
 
 const TABS: TabDef[] = [
-  { id: 'viewer',  label: 'Viewer',  icon: Braces,           gradient: 'from-emerald-500 to-teal-500',   ring: 'ring-emerald-500/40' },
-  { id: 'graph',   label: 'Graph',   icon: Network,          gradient: 'from-violet-500 to-purple-600',  ring: 'ring-violet-500/40'  },
-  { id: 'diff',    label: 'Compare', icon: GitCompareArrows, gradient: 'from-amber-500 to-orange-500',   ring: 'ring-amber-500/40'   },
-  { id: 'schema',  label: 'Schema',  icon: FileCode2,        gradient: 'from-blue-500 to-cyan-500',      ring: 'ring-blue-500/40'    },
-  { id: 'types',   label: 'Types',   icon: Code2,            gradient: 'from-indigo-500 to-violet-500',  ring: 'ring-indigo-500/40'  },
+  {
+    id: "viewer",
+    label: "Viewer",
+    icon: Braces,
+    gradient: "from-emerald-500 to-teal-500",
+    ring: "ring-emerald-500/40",
+  },
+  {
+    id: "graph",
+    label: "Graph",
+    icon: Network,
+    gradient: "from-violet-500 to-purple-600",
+    ring: "ring-violet-500/40",
+  },
+  {
+    id: "diff",
+    label: "Compare",
+    icon: GitCompareArrows,
+    gradient: "from-amber-500 to-orange-500",
+    ring: "ring-amber-500/40",
+  },
+  {
+    id: "schema",
+    label: "Schema",
+    icon: FileCode2,
+    gradient: "from-blue-500 to-cyan-500",
+    ring: "ring-blue-500/40",
+  },
+  {
+    id: "types",
+    label: "Types",
+    icon: Code2,
+    gradient: "from-indigo-500 to-violet-500",
+    ring: "ring-indigo-500/40",
+  },
 ];
 
-const STAT_TYPES = [
-  { key: 'objects'  as keyof JsonStats, label: 'obj',  color: 'text-violet-400'  },
-  { key: 'arrays'   as keyof JsonStats, label: 'arr',  color: 'text-blue-400'    },
-  { key: 'strings'  as keyof JsonStats, label: 'str',  color: 'text-emerald-400' },
-  { key: 'numbers'  as keyof JsonStats, label: 'num',  color: 'text-amber-400'   },
-  { key: 'booleans' as keyof JsonStats, label: 'bool', color: 'text-orange-400'  },
-  { key: 'nulls'    as keyof JsonStats, label: 'null', color: 'text-slate-400'   },
-];
 
 function formatBytes(raw: string): string {
   const b = new TextEncoder().encode(raw).length;
@@ -55,46 +85,60 @@ function TabSkeleton() {
 }
 
 export default function Index() {
-  const { activeTab, setActiveTab, parsedJson, rawInput, parseError } = useJsonStore();
+  const { activeTab, setActiveTab, parsedJson, rawInput, parseError } =
+    useJsonStore();
 
   const [isDark, setIsDark] = useState(() => {
-    const saved = typeof localStorage !== 'undefined' ? localStorage.getItem('json-lab-theme') : null;
-    if (saved) return saved === 'dark';
-    return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const saved =
+      typeof localStorage !== "undefined"
+        ? localStorage.getItem("json-lab-theme")
+        : null;
+    if (saved) return saved === "dark";
+    return (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    );
   });
 
   const [showShortcuts, setShowShortcuts] = useState(false);
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', isDark);
-    localStorage.setItem('json-lab-theme', isDark ? 'dark' : 'light');
+    document.documentElement.classList.toggle("dark", isDark);
+    localStorage.setItem("json-lab-theme", isDark ? "dark" : "light");
   }, [isDark]);
 
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;
-      if (mod && e.key === '?') { e.preventDefault(); setShowShortcuts(v => !v); return; }
+      if (mod && e.key === "?") {
+        e.preventDefault();
+        setShowShortcuts((v) => !v);
+        return;
+      }
       if (mod && /^[1-5]$/.test(e.key)) {
         e.preventDefault();
         const tab = TABS[parseInt(e.key) - 1];
         if (tab) setActiveTab(tab.id);
       }
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
   }, [setActiveTab]);
 
-  const stats = useMemo(() => (parsedJson ? computeStats(parsedJson) : null), [parsedJson]);
-  const byteSize = useMemo(() => (rawInput ? formatBytes(rawInput) : null), [rawInput]);
-  const hasInput = rawInput.trim() !== '';
-  const isValid = hasInput && parsedJson !== null;
-
-  const activeTabDef = TABS.find(t => t.id === activeTab)!;
+  const stats = useMemo(
+    () => (parsedJson ? computeStats(parsedJson) : null),
+    [parsedJson],
+  );
+  const byteSize = useMemo(
+    () => (rawInput ? formatBytes(rawInput) : null),
+    [rawInput],
+  );
+  const hasInput = rawInput.trim() !== "";
+  const isValid = hasInput && parsedJson !== null;;
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background">
-
       {/* ── Header ─────────────────────────────────────────────────── */}
       <header className="app-header flex items-center gap-3 px-4 sm:px-5 py-2 border-b flex-shrink-0 z-20 relative">
         {/* Brand */}
@@ -102,7 +146,9 @@ export default function Index() {
           <div className="relative w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-md shadow-emerald-500/30 logo-glow">
             <Braces className="w-4 h-4 text-white" />
           </div>
-          <span className="text-sm font-extrabold tracking-tight gradient-brand hidden sm:block">JSON Lab</span>
+          <span className="text-sm font-extrabold tracking-tight gradient-brand hidden sm:block">
+            JSON Lens
+          </span>
         </div>
 
         <div className="w-px h-5 bg-border/60 hidden sm:block flex-shrink-0" />
@@ -116,7 +162,7 @@ export default function Index() {
               className={`relative flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
                 activeTab === id
                   ? `bg-gradient-to-r ${gradient} text-white shadow-md ${ring} ring-1`
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/70'
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
               }`}
             >
               <Icon className="w-3.5 h-3.5 flex-shrink-0" />
@@ -127,34 +173,11 @@ export default function Index() {
 
         <div className="flex-1" />
 
-        {/* Status pill (desktop) */}
-        {hasInput && (
-          <div className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-all duration-300 ${
-            isValid
-              ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-              : 'text-red-500 bg-red-500/10 border-red-500/20'
-          }`}>
-            {isValid
-              ? <><CheckCircle2 className="w-3 h-3" /> Valid</>
-              : <><AlertCircle className="w-3 h-3" /> Invalid</>
-            }
-          </div>
-        )}
-
-        {/* Shortcut hint */}
-        <button
-          onClick={() => setShowShortcuts(v => !v)}
-          className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground hidden sm:flex items-center"
-          title="Keyboard shortcuts (⌘?)"
-        >
-          <Keyboard className="w-3.5 h-3.5" />
-        </button>
-
         {/* Theme toggle */}
         <button
-          onClick={() => setIsDark(d => !d)}
+          onClick={() => setIsDark((d) => !d)}
           className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-          title={isDark ? 'Light mode' : 'Dark mode'}
+          title={isDark ? "Light mode" : "Dark mode"}
         >
           {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
@@ -168,33 +191,40 @@ export default function Index() {
         >
           <div
             className="bg-card border rounded-2xl shadow-2xl p-5 w-72 space-y-3"
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-2 mb-1">
               <Keyboard className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm font-semibold">Keyboard Shortcuts</span>
             </div>
             {[
-              ['⌘ 1', 'Viewer'],
-              ['⌘ 2', 'Graph'],
-              ['⌘ 3', 'Compare'],
-              ['⌘ 4', 'Schema'],
-              ['⌘ 5', 'Types'],
-              ['⌘ ?', 'Toggle shortcuts'],
+              ["⌘ 1", "Viewer"],
+              ["⌘ 2", "Graph"],
+              ["⌘ 3", "Compare"],
+              ["⌘ 4", "Schema"],
+              ["⌘ 5", "Types"],
+              ["⌘ ?", "Toggle shortcuts"],
             ].map(([key, desc]) => (
-              <div key={key} className="flex items-center justify-between text-xs">
+              <div
+                key={key}
+                className="flex items-center justify-between text-xs"
+              >
                 <span className="text-muted-foreground">{desc}</span>
-                <kbd className="px-1.5 py-0.5 rounded bg-muted border text-[10px] font-mono">{key}</kbd>
+                <kbd className="px-1.5 py-0.5 rounded bg-muted border text-[10px] font-mono">
+                  {key}
+                </kbd>
               </div>
             ))}
-            <p className="text-[10px] text-muted-foreground/50 pt-1 text-center">Click anywhere to close</p>
+            <p className="text-[10px] text-muted-foreground/50 pt-1 text-center">
+              Click anywhere to close
+            </p>
           </div>
         </div>
       )}
 
       {/* ── Main content ───────────────────────────────────────────── */}
       <main className="flex-1 min-h-0 overflow-hidden">
-        {activeTab === 'viewer' && (
+        {activeTab === "viewer" && (
           <div className="grid grid-cols-1 sm:grid-cols-2 h-full">
             <div className="border-b sm:border-b-0 sm:border-r flex flex-col min-h-0 overflow-hidden">
               <JsonInput />
@@ -204,60 +234,62 @@ export default function Index() {
             </div>
           </div>
         )}
-        {activeTab === 'graph'  && <Suspense fallback={<TabSkeleton />}><JsonGraph /></Suspense>}
-        {activeTab === 'diff'   && <Suspense fallback={<TabSkeleton />}><JsonDiff /></Suspense>}
-        {activeTab === 'schema' && <Suspense fallback={<TabSkeleton />}><JsonSchema /></Suspense>}
-        {activeTab === 'types'  && <Suspense fallback={<TabSkeleton />}><JsonTypes /></Suspense>}
+        {activeTab === "graph" && (
+          <Suspense fallback={<TabSkeleton />}>
+            <JsonGraph />
+          </Suspense>
+        )}
+        {activeTab === "diff" && (
+          <Suspense fallback={<TabSkeleton />}>
+            <JsonDiff />
+          </Suspense>
+        )}
+        {activeTab === "schema" && (
+          <Suspense fallback={<TabSkeleton />}>
+            <JsonSchema />
+          </Suspense>
+        )}
+        {activeTab === "types" && (
+          <Suspense fallback={<TabSkeleton />}>
+            <JsonTypes />
+          </Suspense>
+        )}
       </main>
 
       {/* ── Status Bar ─────────────────────────────────────────────── */}
-      <footer className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 border-t surface-1 flex-shrink-0 overflow-x-auto transition-all duration-300 ${
-        hasInput ? 'h-7 opacity-100' : 'h-0 opacity-0 pointer-events-none'
-      }`}>
+      <footer
+        className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 border-t surface-1 flex-shrink-0 overflow-x-auto transition-all duration-300 ${
+          hasInput ? "h-7 opacity-100" : "h-0 opacity-0 pointer-events-none"
+        }`}
+      >
         {isValid ? (
           <span className="flex items-center gap-1 text-emerald-500 font-semibold text-[11px] flex-shrink-0">
-            <CheckCircle2 className="w-3 h-3" />
-            Valid
+            <CheckCircle2 className="w-3 h-3" /> Valid
           </span>
         ) : parseError ? (
-          <span className="flex items-center gap-1 text-red-400 font-semibold text-[11px] flex-shrink-0 max-w-[200px] truncate" title={parseError}>
+          <span
+            className="flex items-center gap-1 text-red-400 font-semibold text-[11px] flex-shrink-0 max-w-xs truncate"
+            title={parseError}
+          >
             <AlertCircle className="w-3 h-3 flex-shrink-0" />
-            {parseError.split(':')[0]}
+            {parseError.split(":")[0]}
           </span>
         ) : null}
 
         {stats && (
           <>
-            <span className="text-border/80">·</span>
+            <span className="text-border/60 text-[11px]">·</span>
             <span className="text-[11px] text-muted-foreground flex-shrink-0">
               <span className="font-mono font-semibold text-foreground">{stats.total}</span> nodes
             </span>
-            <span className="text-border/80">·</span>
+            <span className="text-border/60 text-[11px]">·</span>
             <span className="text-[11px] text-muted-foreground flex-shrink-0">
               depth <span className="font-mono font-semibold text-foreground">{stats.maxDepth}</span>
             </span>
-            <span className="text-border/80">·</span>
+            <span className="text-border/60 text-[11px]">·</span>
             <span className="text-[11px] text-muted-foreground flex-shrink-0">{byteSize}</span>
           </>
         )}
-
-        <div className="flex-1" />
-
-        {stats && (
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {STAT_TYPES.filter(s => (stats[s.key] as number) > 0).map(({ key, label, color }) => (
-              <span key={key} className="flex items-center gap-0.5 text-[10px] flex-shrink-0">
-                <span className={`font-mono font-semibold ${color}`}>{stats[key] as number}</span>
-                <span className="text-muted-foreground/50">{label}</span>
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Active tab badge */}
-        <span className={`hidden sm:inline text-[10px] px-1.5 py-0.5 rounded-full bg-gradient-to-r ${activeTabDef.gradient} text-white font-medium flex-shrink-0 opacity-60`}>
-          {activeTabDef.label}
-        </span>
       </footer>
     </div>
   );

@@ -1,4 +1,4 @@
-# JSON Lab
+# JSON Lens
 
 A fast, browser-based JSON toolkit built with React, TypeScript, and Vite.
 
@@ -11,14 +11,14 @@ A fast, browser-based JSON toolkit built with React, TypeScript, and Vite.
 
 ## Stack
 
-| Layer | Tech |
-|---|---|
-| Framework | React 18 + TypeScript |
-| Build | Vite + SWC |
-| Styling | Tailwind CSS + shadcn/ui |
-| State | Zustand |
-| Icons | Lucide React |
-| Toasts | Sonner |
+| Layer     | Tech                     |
+| --------- | ------------------------ |
+| Framework | React 18 + TypeScript    |
+| Build     | Vite + SWC               |
+| Styling   | Tailwind CSS + shadcn/ui |
+| State     | Zustand                  |
+| Icons     | Lucide React             |
+| Toasts    | Sonner                   |
 
 ## Getting Started
 
@@ -31,10 +31,10 @@ Open [http://localhost:5173](http://localhost:5173).
 
 ## Scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start dev server |
-| `npm run build` | Production build |
+| Command           | Description              |
+| ----------------- | ------------------------ |
+| `npm run dev`     | Start dev server         |
+| `npm run build`   | Production build         |
 | `npm run preview` | Preview production build |
-| `npm run lint` | Run ESLint |
-| `npm test` | Run unit tests (Vitest) |
+| `npm run lint`    | Run ESLint               |
+| `npm test`        | Run unit tests (Vitest)  |

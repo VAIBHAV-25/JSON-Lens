@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { useJsonStore } from '@/stores/jsonStore';
-import { Upload, Link, AlertCircle, CheckCircle2, FileJson, AlignLeft, Minimize2, Copy, Download, X } from 'lucide-react';
+import { Upload, Link, FileJson, AlignLeft, Minimize2, Copy, Download, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -93,8 +93,6 @@ export default function JsonInput() {
   const isValid = rawInput.trim() !== '' && parsedJson !== null;
   const hasInput = rawInput.trim() !== '';
 
-  const byteSize = getByteSize(rawInput);
-
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Primary toolbar */}
@@ -140,16 +138,6 @@ export default function JsonInput() {
         )}
 
         <div className="flex-1" />
-
-        {hasInput && (
-          <div className={`flex items-center gap-1.5 text-xs font-medium ${isValid ? 'text-emerald-500' : 'text-destructive'}`}>
-            {isValid ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">{isValid ? 'Valid JSON' : 'Invalid'}</span>
-            {isValid && byteSize && (
-              <span className="text-muted-foreground font-normal hidden md:inline">· {byteSize}</span>
-            )}
-          </div>
-        )}
       </div>
 
       {/* URL fetch bar */}
@@ -204,12 +192,4 @@ export default function JsonInput() {
       )}
     </div>
   );
-}
-
-function getByteSize(rawInput: string): string | null {
-  if (!rawInput.trim()) return null;
-  const bytes = new TextEncoder().encode(rawInput).length;
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
