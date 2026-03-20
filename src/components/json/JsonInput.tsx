@@ -15,7 +15,6 @@ import {
   Trash2,
   Wand2,
   Sparkles,
-  ArrowRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -486,31 +485,8 @@ export default function JsonInput() {
 
       {/* Editor */}
       <div className="flex-1 relative min-h-0" onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
-        {showShelfHint && (
-          <div className="absolute top-3 right-3 z-10 max-w-[280px] rounded-2xl border bg-background/95 px-3 py-3 shadow-lg backdrop-blur">
-            <div className="flex items-start gap-2">
-              <div className="mt-0.5 rounded-lg bg-emerald-500/12 p-1.5 text-emerald-500">
-                <Sparkles className="w-3.5 h-3.5" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-sm font-medium">New: Workspace Shelf</div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Save reusable payloads and reopen recent JSON instantly.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => handleShelfOpenChange(true)}
-                  className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400"
-                >
-                  Open Shelf
-                  <ArrowRight className="w-3 h-3" />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
         {!hasInput && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-8 text-center">
+          <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center gap-3 px-8 text-center">
             <div className="w-12 h-12 rounded-2xl bg-muted/60 flex items-center justify-center">
               <FileJson className="w-6 h-6 text-muted-foreground/50" />
             </div>
