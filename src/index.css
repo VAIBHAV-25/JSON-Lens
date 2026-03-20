@@ -257,4 +257,70 @@
   .bg-emerald-500\/8  { background: rgb(16 185 129 / 0.08); }
   .bg-red-500\/8      { background: rgb(239 68 68 / 0.08); }
   .bg-indigo-500\/10  { background: rgb(99 102 241 / 0.10); }
+
+  /* ── Graph animations ────────────────────────────────────────── */
+
+  /* Animated dot grid */
+  .graph-grid {
+    background-image: radial-gradient(circle, rgba(129,140,248,0.35) 1.2px, transparent 1.2px);
+    background-size: 32px 32px;
+    animation: gridDrift 20s linear infinite;
+  }
+  @keyframes gridDrift {
+    0%   { background-position: 0 0; }
+    100% { background-position: 32px 32px; }
+  }
+
+  /* Flowing edge animation */
+  .graph-edge-flow {
+    animation: edgeFlow 2s linear infinite;
+  }
+  @keyframes edgeFlow {
+    from { stroke-dashoffset: 0; }
+    to   { stroke-dashoffset: -32; }
+  }
+
+  /* Node entrance — opacity only to avoid conflicting with SVG transform attribute */
+  .graph-node-enter {
+    animation: nodeEnterFade 0.35s ease-out both;
+  }
+  @keyframes nodeEnterFade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* Aurora blob animations */
+  .aurora-blob-1 {
+    animation: aurora1 12s ease-in-out infinite;
+  }
+  .aurora-blob-2 {
+    animation: aurora2 16s ease-in-out infinite;
+  }
+  .aurora-blob-3 {
+    animation: aurora3 10s ease-in-out infinite;
+  }
+  @keyframes aurora1 {
+    0%, 100% { transform: translate(0,    0)    scale(1);    }
+    33%       { transform: translate(4%,   3%)   scale(1.08); }
+    66%       { transform: translate(-3%,  5%)   scale(0.95); }
+  }
+  @keyframes aurora2 {
+    0%, 100% { transform: translate(0,    0)    scale(1);    }
+    40%       { transform: translate(-5%,  -4%)  scale(1.1);  }
+    70%       { transform: translate(4%,   -2%)  scale(1.05); }
+  }
+  @keyframes aurora3 {
+    0%, 100% { transform: translate(0,    0)    scale(1);    }
+    50%       { transform: translate(-3%,  4%)   scale(1.12); }
+  }
+
+  /* Graph controls button hover */
+  .graph-ctrl-btn {
+    color: rgba(255,255,255,0.55);
+    transition: background 0.15s, color 0.15s;
+  }
+  .graph-ctrl-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.95);
+  }
 }
