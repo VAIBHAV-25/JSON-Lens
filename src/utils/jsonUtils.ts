@@ -96,6 +96,54 @@ export function getItemCount(value: unknown): number {
   return 0;
 }
 
+/** Live stats computed from parsed JSON */
+export interface JsonStats {
+  total: number;
+  objects: number;
+  arrays: number;
+  strings: number;
+  numbers: number;
+  booleans: number;
+  nulls: number;
+  maxDepth: number;
+}
+
+export function computeStats(json: unknown): JsonStats {
+  const s: JsonStats = { total: 0, objects: 0, arrays: 0, strings: 0, numbers: 0, booleans: 0, nulls: 0, maxDepth: 0 };
+  function walk(v: unknown, depth: number) {
+    s.total++;
+    if (depth > s.maxDepth) s.maxDepth = depth;
+    const t = getJsonType(v);
+    if (t === 'object' && v !== null) { s.objects++; Object.values(v as object).forEach(c => walk(c, depth + 1)); }
+    else if (t === 'array') { s.arrays++; (v as unknown[]).forEach(c => walk(c, depth + 1)); }
+    else if (t === 'string') s.strings++;
+    else if (t === 'number') s.numbers++;
+    else if (t === 'boolean') s.booleans++;
+    else s.nulls++;
+  }
+  walk(json, 0);
+  return s;
+}
+
+/** Extract a value by dot/bracket path, e.g. "users[0].name" */
+export function extractByPath(json: unknown, path: string): { value: unknown; found: boolean } {
+  if (!path.trim()) return { value: json, found: true };
+  const parts: (string | number)[] = [];
+  const norm = path.replace(/\[(\d+)\]/g, '.$1').replace(/^\$\.?/, '');
+  for (const part of norm.split('.').filter(Boolean)) {
+    parts.push(isNaN(Number(part)) ? part : Number(part));
+  }
+  let cur: unknown = json;
+  for (const p of parts) {
+    if (cur === null || cur === undefined) return { value: undefined, found: false };
+    if (typeof cur !== 'object') return { value: undefined, found: false };
+    cur = Array.isArray(cur)
+      ? typeof p === 'number' ? cur[p] : undefined
+      : (cur as Record<string, unknown>)[String(p)];
+  }
+  return { value: cur, found: cur !== undefined };
+}
+
 /** Detect if JSON has chartable structure (array of objects with numeric values) */
 export function detectChartableKeys(data: unknown): { labels: string[]; numeric: string[] } {
   if (!Array.isArray(data) || data.length === 0) return { labels: [], numeric: [] };

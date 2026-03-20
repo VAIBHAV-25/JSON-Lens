@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type JsonTab = 'viewer' | 'graph' | 'diff' | 'schema';
+export type JsonTab = 'viewer' | 'graph' | 'diff' | 'schema' | 'types';
 
 interface JsonState {
   // Main JSON

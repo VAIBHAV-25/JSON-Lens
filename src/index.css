@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,15 +7,15 @@
 @layer base {
   :root {
     --background: 40 20% 98%;
-    --foreground: 220 20% 14%;
+    --foreground: 220 20% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 14%;
+    --card-foreground: 220 20% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 14%;
+    --popover-foreground: 220 20% 12%;
 
-    --primary: 158 54% 32%;
+    --primary: 158 54% 36%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 14% 94%;
@@ -32,22 +32,22 @@
 
     --border: 220 13% 90%;
     --input: 220 13% 90%;
-    --ring: 158 54% 32%;
+    --ring: 158 54% 36%;
 
     --radius: 0.5rem;
 
-    /* Syntax highlighting */
-    --syntax-string: 152 56% 36%;
-    --syntax-number: 220 70% 50%;
+    /* Syntax */
+    --syntax-string:  152 56% 36%;
+    --syntax-number:  220 70% 50%;
     --syntax-boolean: 28 80% 52%;
-    --syntax-null: 220 10% 54%;
-    --syntax-key: 220 20% 30%;
+    --syntax-null:    220 10% 54%;
+    --syntax-key:     220 20% 30%;
     --syntax-bracket: 220 10% 46%;
-    --syntax-added: 152 60% 36%;
+    --syntax-added:   152 60% 36%;
     --syntax-removed: 0 72% 51%;
-    --syntax-modified: 38 92% 50%;
+    --syntax-modified:38 92% 50%;
 
-    /* Surface layers */
+    /* Surfaces */
     --surface-1: 40 15% 96%;
     --surface-2: 40 12% 93%;
     --surface-3: 40 10% 89%;
@@ -63,47 +63,47 @@
   }
 
   .dark {
-    --background: 224 20% 8%;
+    --background: 224 22% 7%;
     --foreground: 210 20% 90%;
 
-    --card: 224 18% 11%;
+    --card: 224 18% 10%;
     --card-foreground: 210 20% 90%;
 
-    --popover: 224 18% 11%;
+    --popover: 224 18% 10%;
     --popover-foreground: 210 20% 90%;
 
-    --primary: 158 54% 42%;
+    --primary: 158 54% 44%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 224 14% 16%;
     --secondary-foreground: 210 20% 90%;
 
-    --muted: 224 14% 16%;
-    --muted-foreground: 220 10% 54%;
+    --muted: 224 14% 15%;
+    --muted-foreground: 220 10% 52%;
 
-    --accent: 38 92% 50%;
+    --accent: 38 92% 52%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 40%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 224 14% 18%;
-    --input: 224 14% 18%;
-    --ring: 158 54% 42%;
+    --border: 224 14% 17%;
+    --input: 224 14% 17%;
+    --ring: 158 54% 44%;
 
-    --syntax-string: 152 56% 52%;
-    --syntax-number: 220 70% 68%;
+    --syntax-string:  152 56% 52%;
+    --syntax-number:  220 70% 68%;
     --syntax-boolean: 28 80% 62%;
-    --syntax-null: 220 10% 54%;
-    --syntax-key: 210 20% 78%;
-    --syntax-bracket: 220 10% 50%;
-    --syntax-added: 152 60% 46%;
+    --syntax-null:    220 10% 50%;
+    --syntax-key:     210 20% 78%;
+    --syntax-bracket: 220 10% 48%;
+    --syntax-added:   152 60% 46%;
     --syntax-removed: 0 72% 60%;
-    --syntax-modified: 38 92% 56%;
+    --syntax-modified:38 92% 56%;
 
-    --surface-1: 224 16% 12%;
-    --surface-2: 224 14% 15%;
-    --surface-3: 224 12% 18%;
+    --surface-1: 224 18% 11%;
+    --surface-2: 224 16% 14%;
+    --surface-3: 224 14% 17%;
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -117,65 +117,144 @@
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
+  * { @apply border-border; }
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, sans-serif;
   }
-
   code, .font-mono {
     font-family: 'JetBrains Mono', monospace;
   }
 }
 
 @layer components {
-  .json-string { color: hsl(var(--syntax-string)); }
-  .json-number { color: hsl(var(--syntax-number)); }
+  /* JSON syntax */
+  .json-string  { color: hsl(var(--syntax-string)); }
+  .json-number  { color: hsl(var(--syntax-number)); }
   .json-boolean { color: hsl(var(--syntax-boolean)); }
-  .json-null { color: hsl(var(--syntax-null)); font-style: italic; }
-  .json-key { color: hsl(var(--syntax-key)); font-weight: 500; }
+  .json-null    { color: hsl(var(--syntax-null)); font-style: italic; }
+  .json-key     { color: hsl(var(--syntax-key)); font-weight: 500; }
   .json-bracket { color: hsl(var(--syntax-bracket)); }
-  .diff-added { background: hsl(var(--syntax-added) / 0.12); }
-  .diff-removed { background: hsl(var(--syntax-removed) / 0.12); }
+
+  /* Diff */
+  .diff-added    { background: hsl(var(--syntax-added)    / 0.12); }
+  .diff-removed  { background: hsl(var(--syntax-removed)  / 0.12); }
   .diff-modified { background: hsl(var(--syntax-modified) / 0.12); }
 
+  /* Surfaces */
   .surface-1 { background: hsl(var(--surface-1)); }
   .surface-2 { background: hsl(var(--surface-2)); }
   .surface-3 { background: hsl(var(--surface-3)); }
+
+  /* Header gradient */
+  .app-header {
+    background: hsl(var(--card));
+    backdrop-filter: blur(12px);
+  }
+  .dark .app-header {
+    background: linear-gradient(135deg, hsl(224,22%,9%) 0%, hsl(228,22%,10%) 100%);
+  }
+
+  /* Brand gradient text */
+  .gradient-brand {
+    background: linear-gradient(135deg, #10b981 0%, #059669 50%, #0d9488 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* TypeScript syntax */
+  .ts-kw      { color: #a78bfa; }
+  .ts-name    { color: #34d399; }
+  .ts-prop    { color: #93c5fd; }
+  .ts-builtin { color: #fbbf24; }
+  .ts-comment { color: #6b7280; font-style: italic; }
+  .ts-ref     { color: #67e8f9; }
+  .ts-bracket { color: #6b7280; }
+
+  .dark .ts-kw      { color: #c4b5fd; }
+  .dark .ts-name    { color: #6ee7b7; }
+  .dark .ts-prop    { color: #bfdbfe; }
+  .dark .ts-builtin { color: #fcd34d; }
+  .dark .ts-comment { color: #4b5563; }
+  .dark .ts-ref     { color: #a5f3fc; }
+  .dark .ts-bracket { color: #4b5563; }
+
+  .ts-code-block {
+    background: transparent;
+    min-height: 100px;
+  }
 }
 
 @layer utilities {
+  /* Scrollbar */
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--border)) transparent;
   }
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
+  .scrollbar-thin::-webkit-scrollbar       { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background: hsl(var(--border));
     border-radius: 3px;
   }
 
+  /* Fade-in */
   .animate-fade-in {
     animation: fadeIn 0.15s ease-out;
   }
-
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(2px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(3px); }
+    to   { opacity: 1; transform: translateY(0);   }
   }
 
-  .glass-panel {
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
+  /* Slide-up */
+  .animate-slide-up {
+    animation: slideUp 0.2s cubic-bezier(0.16,1,0.3,1);
   }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0);   }
+  }
+
+  /* Logo glow pulse */
+  .logo-glow {
+    animation: logoGlow 4s ease-in-out infinite;
+  }
+  @keyframes logoGlow {
+    0%, 100% { box-shadow: 0 4px 12px rgba(16,185,129,0.3), 0 0 0 0 rgba(16,185,129,0); }
+    50%       { box-shadow: 0 4px 20px rgba(16,185,129,0.5), 0 0 0 4px rgba(16,185,129,0.08); }
+  }
+
+  /* Glass panel */
+  .glass-panel {
+    background: rgba(15,23,42,0.85);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(14px);
+  }
+
+  /* Shimmer skeleton */
+  .shimmer {
+    background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--surface-2)) 50%, hsl(var(--muted)) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+  }
+
+  /* Bounce-in for toasts / overlays */
+  .animate-bounce-in {
+    animation: bounceIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes bounceIn {
+    from { opacity: 0; transform: scale(0.85); }
+    to   { opacity: 1; transform: scale(1);    }
+  }
+
+  /* Emerald bg utility for path extract */
+  .bg-emerald-500\/8  { background: rgb(16 185 129 / 0.08); }
+  .bg-red-500\/8      { background: rgb(239 68 68 / 0.08); }
+  .bg-indigo-500\/10  { background: rgb(99 102 241 / 0.10); }
 }
