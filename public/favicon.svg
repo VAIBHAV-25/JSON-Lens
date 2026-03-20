@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#16a34a"/>
+  <g fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left brace { -->
+    <path d="M13 7 C11 7 10 8 10 10 L10 13 C10 15 9 16 8 16 C9 16 10 17 10 19 L10 22 C10 24 11 25 13 25"/>
+    <!-- Right brace } -->
+    <path d="M19 7 C21 7 22 8 22 10 L22 13 C22 15 23 16 24 16 C23 16 22 17 22 19 L22 22 C22 24 21 25 19 25"/>
+  </g>
+</svg>
