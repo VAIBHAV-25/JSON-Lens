@@ -5,21 +5,24 @@ import {
   Network,
   FileCode2,
   Code2,
+  List,
   Sun,
   Moon,
   CheckCircle2,
   AlertCircle,
   Keyboard,
 } from "lucide-react";
+
 import { useState, useEffect, lazy, Suspense, useMemo } from "react";
 import JsonInput from "@/components/json/JsonInput";
 import JsonTreeView from "@/components/json/JsonTreeView";
 import { computeStats } from "@/utils/jsonUtils";
 
-const JsonDiff = lazy(() => import("@/components/json/JsonDiff"));
-const JsonGraph = lazy(() => import("@/components/json/JsonGraph"));
-const JsonSchema = lazy(() => import("@/components/json/JsonSchema"));
-const JsonTypes = lazy(() => import("@/components/json/JsonTypes"));
+const JsonDiff    = lazy(() => import("@/components/json/JsonDiff"));
+const JsonGraph   = lazy(() => import("@/components/json/JsonGraph"));
+const JsonSchema  = lazy(() => import("@/components/json/JsonSchema"));
+const JsonTypes   = lazy(() => import("@/components/json/JsonTypes"));
+const JsonFlatten = lazy(() => import("@/components/json/JsonFlatten"));
 
 interface TabDef {
   id: JsonTab;
@@ -64,6 +67,13 @@ const TABS: TabDef[] = [
     icon: Code2,
     gradient: "from-indigo-500 to-violet-500",
     ring: "ring-indigo-500/40",
+  },
+  {
+    id: "flatten",
+    label: "Flatten",
+    icon: List,
+    gradient: "from-cyan-500 to-sky-500",
+    ring: "ring-cyan-500/40",
   },
 ];
 
@@ -116,7 +126,7 @@ export default function Index() {
         setShowShortcuts((v) => !v);
         return;
       }
-      if (mod && /^[1-5]$/.test(e.key)) {
+      if (mod && /^[1-6]$/.test(e.key)) {
         e.preventDefault();
         const tab = TABS[parseInt(e.key) - 1];
         if (tab) setActiveTab(tab.id);
@@ -203,6 +213,7 @@ export default function Index() {
               ["⌘ 3", "Compare"],
               ["⌘ 4", "Schema"],
               ["⌘ 5", "Types"],
+              ["⌘ 6", "Flatten"],
               ["⌘ ?", "Toggle shortcuts"],
             ].map(([key, desc]) => (
               <div
@@ -252,6 +263,11 @@ export default function Index() {
         {activeTab === "types" && (
           <Suspense fallback={<TabSkeleton />}>
             <JsonTypes />
+          </Suspense>
+        )}
+        {activeTab === "flatten" && (
+          <Suspense fallback={<TabSkeleton />}>
+            <JsonFlatten />
           </Suspense>
         )}
       </main>
