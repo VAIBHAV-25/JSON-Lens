@@ -93,6 +93,13 @@ export default function JsonGraph() {
   const [isPanning, setIsPanning] = useState(false);
   const [isZooming, setIsZooming] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [pinnedNode, setPinnedNode] = useState<TreeNode | null>(null);
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+  const [tooltipHovered, setTooltipHovered] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const lastHoveredNodeRef = useRef<TreeNode | null>(null);
+  // Ref so the memoized mouse-move callback can read the latest value without re-creating
+  const tooltipHoveredRef = useRef(false);
   const panStart = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
   const transformRef = useRef(transform);
   const zoomTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -155,6 +162,20 @@ export default function JsonGraph() {
       y: panStart.current.ty + (e.clientY - panStart.current.y),
     }));
   }, [isPanning]);
+
+  // Track cursor position for tooltip — skip updates while cursor is inside the tooltip
+  const handleMouseMoveTooltip = useCallback((e: React.MouseEvent) => {
+    if (isPanning || tooltipHoveredRef.current) return;
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) setTooltipPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  }, [isPanning]);
+
+  const handleCopyPath = useCallback((path: string) => {
+    navigator.clipboard.writeText(path).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1400);
+    });
+  }, []);
 
   const handleMouseUp = useCallback(() => setIsPanning(false), []);
 
@@ -286,18 +307,18 @@ export default function JsonGraph() {
             <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', fontWeight: 500 }}>{type}</span>
           </span>
         ))}
-        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', marginLeft: 4 }}>· Scroll zoom · Drag pan</span>
+        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', marginLeft: 4 }}>· Scroll zoom · Drag pan · Hover/click path</span>
       </div>
 
       {/* ── SVG Canvas ── */}
       <div
         ref={containerRef}
         className="flex-1 overflow-hidden"
-        style={{ cursor: isPanning ? 'grabbing' : 'grab' }}
+        style={{ cursor: isPanning ? 'grabbing' : 'grab', position: 'relative' }}
         onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
+        onMouseMove={(e) => { handleMouseMove(e); handleMouseMoveTooltip(e); }}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseLeave={() => { handleMouseUp(); setHoveredId(null); }}
       >
         <svg width="100%" height="100%" className="select-none">
           <defs>
@@ -360,6 +381,7 @@ export default function JsonGraph() {
               const cfg = T[node.type] || T.null;
               const hasChildren = node.children.length > 0;
               const isHov = hoveredId === node.id;
+              const isPinned = pinnedNode?.id === node.id;
               const childLabel = hasChildren
                 ? node.type === 'array' ? `[${node.children.length} items]` : `{${node.children.length} keys}`
                 : null;
@@ -370,8 +392,12 @@ export default function JsonGraph() {
                   transform={`translate(${node.x}, ${node.y - NODE_H / 2})`}
                   onMouseEnter={() => setHoveredId(node.id)}
                   onMouseLeave={() => setHoveredId(null)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPinnedNode(prev => prev?.id === node.id ? null : node);
+                  }}
                   className="graph-node-enter"
-                  style={{ cursor: 'default', animationDelay: `${Math.min(idx * 8, 300)}ms` }}
+                  style={{ cursor: 'pointer', animationDelay: `${Math.min(idx * 8, 300)}ms` }}
                 >
                   {/* Ambient glow around card */}
                   <rect
@@ -383,10 +409,10 @@ export default function JsonGraph() {
                     filter={`url(#glow-${node.type})`}
                   />
 
-                  {/* Hover ring */}
-                  {isHov && (
+                  {/* Hover / pinned ring */}
+                  {(isHov || isPinned) && (
                     <rect x={-2} y={-2} width={NODE_W + 4} height={NODE_H + 4} rx={12}
-                      fill="none" stroke={cfg.accent} strokeWidth={1.5} opacity={0.7}
+                      fill="none" stroke={cfg.accent} strokeWidth={isPinned ? 2 : 1.5} opacity={isPinned ? 1 : 0.7}
                       filter="url(#glow-hover)"
                     />
                   )}
@@ -466,6 +492,96 @@ export default function JsonGraph() {
             })}
           </g>
         </svg>
+
+        {/* ── JSON Path Tooltip ── */}
+        {(() => {
+          // Update ref whenever we have a real hovered node
+          const hoveredNode = hoveredId ? nodes.find(n => n.id === hoveredId) : null;
+          if (hoveredNode) lastHoveredNodeRef.current = hoveredNode;
+          // Show tooltip if: pinned OR hovering a node OR cursor is inside the tooltip
+          const activeNode = pinnedNode ?? (tooltipHovered ? lastHoveredNodeRef.current : hoveredNode);
+          if (!activeNode) return null;
+          const cfg = T[activeNode.type] || T.null;
+          const valPreview = activeNode.children.length > 0
+            ? activeNode.type === 'array' ? `[${activeNode.children.length} items]` : `{${activeNode.children.length} keys}`
+            : shortVal(activeNode.value, activeNode.type);
+          // Smart placement: keep tooltip within viewport
+          const TOOLTIP_W = 320;
+          const TOOLTIP_H = 110;
+          const containerW = containerRef.current?.clientWidth ?? 800;
+          const containerH = containerRef.current?.clientHeight ?? 600;
+          const rawX = tooltipPos.x + 18;
+          const rawY = tooltipPos.y + 18;
+          const tx = rawX + TOOLTIP_W > containerW ? tooltipPos.x - TOOLTIP_W - 12 : rawX;
+          const ty = rawY + TOOLTIP_H > containerH ? tooltipPos.y - TOOLTIP_H - 12 : rawY;
+          return (
+            <div
+              onMouseEnter={() => { tooltipHoveredRef.current = true; setTooltipHovered(true); }}
+              onMouseLeave={() => { tooltipHoveredRef.current = false; setTooltipHovered(false); }}
+              style={{
+                position: 'absolute',
+                left: tx,
+                top: ty,
+                width: TOOLTIP_W,
+                pointerEvents: 'auto',
+                zIndex: 50,
+                borderRadius: 14,
+                background: 'rgba(6,9,24,0.97)',
+                border: `1.5px solid ${cfg.border}`,
+                boxShadow: `0 8px 40px rgba(0,0,0,0.6), 0 0 20px ${cfg.glow}`,
+                backdropFilter: 'blur(20px)',
+                padding: '12px 14px',
+                fontSize: 12,
+                transition: (pinnedNode || tooltipHovered) ? 'none' : 'left 0.06s, top 0.06s',
+              }}
+            >
+              {/* Header row */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: cfg.accent }}>
+                  JSON Path
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 9.5, fontWeight: 600, padding: '2px 7px', borderRadius: 6, background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.tag }}>
+                    {activeNode.type}
+                  </span>
+                  {pinnedNode && (
+                    <button
+                      onClick={() => setPinnedNode(null)}
+                      style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: 10, padding: '2px 7px' }}
+                    >
+                      ✕ close
+                    </button>
+                  )}
+                </div>
+              </div>
+              {/* Path pill */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.05)', borderRadius: 8, padding: '7px 10px', border: '1px solid rgba(255,255,255,0.08)', marginBottom: 8 }}>
+                <span style={{ flex: 1, fontFamily: "'JetBrains Mono', 'Fira Code', monospace", fontSize: 12, color: cfg.label, wordBreak: 'break-all', lineHeight: 1.5 }}>
+                  {activeNode.id}
+                </span>
+                <button
+                  onClick={() => handleCopyPath(activeNode.id)}
+                  style={{ flexShrink: 0, background: copied ? 'rgba(52,211,153,0.2)' : 'rgba(255,255,255,0.07)', border: `1px solid ${copied ? 'rgba(52,211,153,0.5)' : 'rgba(255,255,255,0.12)'}`, borderRadius: 6, color: copied ? '#34d399' : 'rgba(255,255,255,0.55)', cursor: 'pointer', padding: '3px 8px', fontSize: 10, fontWeight: 600, transition: 'all 0.2s' }}
+                >
+                  {copied ? '✓ Copied' : 'Copy'}
+                </button>
+              </div>
+              {/* Value row */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', flexShrink: 0 }}>value</span>
+                <span style={{ fontFamily: activeNode.children.length ? "'Inter', sans-serif" : "'JetBrains Mono', monospace", fontSize: 11, color: cfg.val, opacity: 0.85 }}>
+                  {valPreview}
+                </span>
+                {pinnedNode && (
+                  <span style={{ marginLeft: 'auto', fontSize: 9.5, color: 'rgba(255,255,255,0.25)', fontStyle: 'italic', flexShrink: 0 }}>pinned</span>
+                )}
+              </div>
+              {!pinnedNode && (
+                <div style={{ marginTop: 6, fontSize: 9.5, color: 'rgba(255,255,255,0.22)', fontStyle: 'italic' }}>Click node to pin</div>
+              )}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
