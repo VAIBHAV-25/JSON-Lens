@@ -92,14 +92,9 @@ export default function JsonGraph() {
   const [transform, setTransform] = useState({ x: 60, y: 60, scale: 1 });
   const [isPanning, setIsPanning] = useState(false);
   const [isZooming, setIsZooming] = useState(false);
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [hoveredNode, setHoveredNode] = useState<TreeNode | null>(null);
   const [pinnedNode, setPinnedNode] = useState<TreeNode | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
-  const [tooltipHovered, setTooltipHovered] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const lastHoveredNodeRef = useRef<TreeNode | null>(null);
-  // Ref so the memoized mouse-move callback can read the latest value without re-creating
-  const tooltipHoveredRef = useRef(false);
   const panStart = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
   const transformRef = useRef(transform);
   const zoomTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -155,27 +150,17 @@ export default function JsonGraph() {
   }, [transform]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isPanning) return;
-    setTransform(t => ({
-      ...t,
-      x: panStart.current.tx + (e.clientX - panStart.current.x),
-      y: panStart.current.ty + (e.clientY - panStart.current.y),
-    }));
+    if (isPanning) {
+      setTransform(t => ({
+        ...t,
+        x: panStart.current.tx + (e.clientX - panStart.current.x),
+        y: panStart.current.ty + (e.clientY - panStart.current.y),
+      }));
+    } else {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (rect) setTooltipPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    }
   }, [isPanning]);
-
-  // Track cursor position for tooltip — skip updates while cursor is inside the tooltip
-  const handleMouseMoveTooltip = useCallback((e: React.MouseEvent) => {
-    if (isPanning || tooltipHoveredRef.current) return;
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (rect) setTooltipPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-  }, [isPanning]);
-
-  const handleCopyPath = useCallback((path: string) => {
-    navigator.clipboard.writeText(path).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1400);
-    });
-  }, []);
 
   const handleMouseUp = useCallback(() => setIsPanning(false), []);
 
@@ -316,9 +301,9 @@ export default function JsonGraph() {
         className="flex-1 overflow-hidden"
         style={{ cursor: isPanning ? 'grabbing' : 'grab', position: 'relative' }}
         onMouseDown={handleMouseDown}
-        onMouseMove={(e) => { handleMouseMove(e); handleMouseMoveTooltip(e); }}
+        onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={() => { handleMouseUp(); setHoveredId(null); }}
+        onMouseLeave={() => { handleMouseUp(); setHoveredNode(null); }}
       >
         <svg width="100%" height="100%" className="select-none">
           <defs>
@@ -350,7 +335,7 @@ export default function JsonGraph() {
               const y2 = edge.to.y;
               const cp = x1 + (x2 - x1) * 0.5;
               const cfg = T[edge.from.type] || T.null;
-              const isHov = hoveredId === edge.from.id || hoveredId === edge.to.id;
+              const isHov = hoveredNode?.id === edge.from.id || hoveredNode?.id === edge.to.id;
               return (
                 <g key={i}>
                   {/* Shadow path for depth */}
@@ -380,7 +365,7 @@ export default function JsonGraph() {
             {nodes.map((node, idx) => {
               const cfg = T[node.type] || T.null;
               const hasChildren = node.children.length > 0;
-              const isHov = hoveredId === node.id;
+              const isHov = hoveredNode?.id === node.id;
               const isPinned = pinnedNode?.id === node.id;
               const childLabel = hasChildren
                 ? node.type === 'array' ? `[${node.children.length} items]` : `{${node.children.length} keys}`
@@ -390,8 +375,8 @@ export default function JsonGraph() {
                 <g
                   key={node.id}
                   transform={`translate(${node.x}, ${node.y - NODE_H / 2})`}
-                  onMouseEnter={() => setHoveredId(node.id)}
-                  onMouseLeave={() => setHoveredId(null)}
+                  onMouseEnter={() => setHoveredNode(node)}
+                  onMouseLeave={() => setHoveredNode(null)}
                   onClick={(e) => {
                     e.stopPropagation();
                     setPinnedNode(prev => prev?.id === node.id ? null : node);
@@ -493,21 +478,17 @@ export default function JsonGraph() {
           </g>
         </svg>
 
-        {/* ── JSON Path Tooltip ── */}
+        {/* ── JSON Path Tooltip — follows cursor, NO pointer events ── */}
         {(() => {
-          // Update ref whenever we have a real hovered node
-          const hoveredNode = hoveredId ? nodes.find(n => n.id === hoveredId) : null;
-          if (hoveredNode) lastHoveredNodeRef.current = hoveredNode;
-          // Show tooltip if: pinned OR hovering a node OR cursor is inside the tooltip
-          const activeNode = pinnedNode ?? (tooltipHovered ? lastHoveredNodeRef.current : hoveredNode);
+          const activeNode = pinnedNode ?? hoveredNode;
           if (!activeNode) return null;
           const cfg = T[activeNode.type] || T.null;
           const valPreview = activeNode.children.length > 0
             ? activeNode.type === 'array' ? `[${activeNode.children.length} items]` : `{${activeNode.children.length} keys}`
             : shortVal(activeNode.value, activeNode.type);
-          // Smart placement: keep tooltip within viewport
+          // Anchor near cursor; flip left/up if too close to edges
           const TOOLTIP_W = 320;
-          const TOOLTIP_H = 110;
+          const TOOLTIP_H = 120;
           const containerW = containerRef.current?.clientWidth ?? 800;
           const containerH = containerRef.current?.clientHeight ?? 600;
           const rawX = tooltipPos.x + 18;
@@ -516,14 +497,12 @@ export default function JsonGraph() {
           const ty = rawY + TOOLTIP_H > containerH ? tooltipPos.y - TOOLTIP_H - 12 : rawY;
           return (
             <div
-              onMouseEnter={() => { tooltipHoveredRef.current = true; setTooltipHovered(true); }}
-              onMouseLeave={() => { tooltipHoveredRef.current = false; setTooltipHovered(false); }}
               style={{
                 position: 'absolute',
                 left: tx,
                 top: ty,
                 width: TOOLTIP_W,
-                pointerEvents: 'auto',
+                pointerEvents: 'none', // Critical: pass clicks through
                 zIndex: 50,
                 borderRadius: 14,
                 background: 'rgba(6,9,24,0.97)',
@@ -532,7 +511,8 @@ export default function JsonGraph() {
                 backdropFilter: 'blur(20px)',
                 padding: '12px 14px',
                 fontSize: 12,
-                transition: (pinnedNode || tooltipHovered) ? 'none' : 'left 0.06s, top 0.06s',
+                transition: pinnedNode ? 'none' : 'left 0.05s ease-out, top 0.05s ease-out',
+                willChange: 'left, top'
               }}
             >
               {/* Header row */}
@@ -545,12 +525,9 @@ export default function JsonGraph() {
                     {activeNode.type}
                   </span>
                   {pinnedNode && (
-                    <button
-                      onClick={() => setPinnedNode(null)}
-                      style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: 10, padding: '2px 7px' }}
-                    >
+                    <span style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, color: 'rgba(255,255,255,0.5)', fontSize: 10, padding: '2px 7px', pointerEvents: 'auto', cursor: 'pointer' }} onClick={() => setPinnedNode(null)}>
                       ✕ close
-                    </button>
+                    </span>
                   )}
                 </div>
               </div>
@@ -559,12 +536,6 @@ export default function JsonGraph() {
                 <span style={{ flex: 1, fontFamily: "'JetBrains Mono', 'Fira Code', monospace", fontSize: 12, color: cfg.label, wordBreak: 'break-all', lineHeight: 1.5 }}>
                   {activeNode.id}
                 </span>
-                <button
-                  onClick={() => handleCopyPath(activeNode.id)}
-                  style={{ flexShrink: 0, background: copied ? 'rgba(52,211,153,0.2)' : 'rgba(255,255,255,0.07)', border: `1px solid ${copied ? 'rgba(52,211,153,0.5)' : 'rgba(255,255,255,0.12)'}`, borderRadius: 6, color: copied ? '#34d399' : 'rgba(255,255,255,0.55)', cursor: 'pointer', padding: '3px 8px', fontSize: 10, fontWeight: 600, transition: 'all 0.2s' }}
-                >
-                  {copied ? '✓ Copied' : 'Copy'}
-                </button>
               </div>
               {/* Value row */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
