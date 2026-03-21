@@ -1,97 +1,99 @@
 # JSON Lens
 
-JSON Lens is a local-first JSON workspace for inspecting, transforming, comparing, and understanding JSON quickly. It runs entirely in the browser with no backend, no upload step, and no account required.
+JSON Lens is a local-first JSON workspace for inspecting, transforming, comparing, and understanding JSON. It runs entirely in the browser — no backend, no uploads, no account required.
 
-## Why JSON Lens
-
-- View raw JSON and structured tree output side by side
-- Explore nested structures visually with an animated graph
-- Compare two payloads with inline diff highlighting
-- Generate JSON Schema and TypeScript types instantly
-- Save reusable payloads locally with the Workspace Shelf
-- Apply common transforms without leaving the editor
-
-## Core Features
+## Features
 
 ### Viewer
 
-The Viewer is the main workspace for day-to-day JSON editing and inspection.
+The main workspace for day-to-day JSON editing and inspection.
 
 - Paste, upload, fetch from a URL, or load sample JSON
-- Format, minify, copy, download, and clear input
-- Browse an interactive tree view with search
-- Extract values with JSONPath-style paths
-- Use compact editor actions without leaving the screen
-
-### Workspace Shelf
-
-The Workspace Shelf is a local snippet library built into the Viewer.
-
-- Save frequently used payloads with optional names
-- Reopen recent valid JSON instantly
-- Pin recent payloads into saved snippets
-- Remove old saved or recent items
-- Keep everything in browser local storage only
-
-### Transforms
-
-Transforms make the editor more useful for cleanup and reshaping tasks.
-
-- Sort keys recursively
-- Flatten nested JSON into path-based keys
-- Pick selected fields with comma-separated paths
-- Remove null and empty values
+- Format, minify, copy, and download input
+- Interactive tree view with search across keys and values
+- **JSON Path tooltip** — hover any field to see its full JSONPath (e.g. `$.users[0].address.city`)
+- **Smart value annotations** — strings and numbers are automatically decorated on hover:
+  - URLs → clickable external link icon
+  - ISO dates & datetime strings → relative time badge (e.g. "2 days ago")
+  - Unix timestamps (10 or 13-digit) → human-readable date
+  - JWT tokens → click to decode header + payload inline
+  - Hex color codes → inline color swatch preview
+  - Email addresses → mail icon
+- Extract values with JSONPath-style expressions via the Path Extractor panel
+- Workspace Shelf — save, reload, and pin JSON snippets in local storage
 
 ### Graph
 
-The Graph tab turns JSON into a navigable structure map.
+Visualize JSON as an interactive node graph.
 
-- Pan and zoom through connected nodes
-- See type-colored cards for objects, arrays, and primitives
-- Inspect key names, values, and child counts at a glance
-- Use the live stats panel for nodes, edges, and depth
+- Pan, zoom, and fit-to-view controls
+- Type-colored node cards (objects, arrays, strings, numbers, booleans, null)
+- **JSON Path tooltip on hover** — shows full path, type badge, and value with copy-to-clipboard
+- **Click to pin** the tooltip; close with the ✕ button
+- Live stats panel: node count, edge count, max depth, and type breakdown
 
 ### Compare
 
-The Compare tab is designed for payload review and debugging.
+Side-by-side diff for payload review and debugging.
 
-- Compare two JSON documents side by side
-- Highlight added, removed, and modified lines inline
-- See a structured change list below the rendered diff
-- Filter changes by type for faster review
+- Compare two JSON documents with inline diff highlighting
+- Added, removed, and modified lines clearly marked
+- Structured change list with type-based filtering
 
 ### Schema
 
-Generate a Draft-07 style schema from the current JSON.
+Generate a Draft-07 JSON Schema from the current JSON.
 
-- Infer nested object and array shapes
-- Detect common string formats like email, URI, and date-time
+- Infers nested object and array shapes
+- Detects common string formats (email, URI, date-time)
 - Switch between tree view and raw schema JSON
 - Copy or download the generated schema
 
-### Types
+### Types — Code Generation
 
-Generate TypeScript definitions from JSON data.
+Generate type definitions from JSON data in three formats:
 
-- Infer nested interfaces
-- Handle arrays and unions
-- Review generated code or interface summaries
-- Download the result as a `.d.ts` file
+| Target | Output |
+|---|---|
+| **TypeScript** | `export interface` definitions with smart comments (email, URL, date) |
+| **Zod** | `z.object()` schemas with refinements (`.email()`, `.url()`, `.datetime()`, `.int()`) |
+| **Python** | `TypedDict` classes with `List`, `Optional`, `Any` imports |
+
+Switch between targets with the `TypeScript | Zod | Python` segmented control. Copy or download each result.
+
+### Flatten
+
+View the entire JSON as a searchable flat table of `$.path → value` pairs.
+
+- Filter by type: string, number, boolean, null
+- Live search across paths and values
+- Copy individual rows, copy all as flat JSON or `.env` style, or download as `.txt`
+
+### Transforms
+
+Common cleanup and reshaping operations:
+
+- Sort keys recursively
+- Flatten nested JSON into dot-notation keys
+- Pick selected fields by path
+- Remove null and empty values
 
 ## Keyboard Shortcuts
 
 | Shortcut | Action |
-| -------- | ------ |
+|---|---|
 | `Cmd/Ctrl + 1` | Viewer |
 | `Cmd/Ctrl + 2` | Graph |
 | `Cmd/Ctrl + 3` | Compare |
 | `Cmd/Ctrl + 4` | Schema |
 | `Cmd/Ctrl + 5` | Types |
+| `Cmd/Ctrl + 6` | Flatten |
+| `Cmd/Ctrl + ?` | Toggle shortcut reference |
 
 ## Tech Stack
 
 | Layer | Tech |
-| ----- | ---- |
+|---|---|
 | Framework | React 18 + TypeScript |
 | Build | Vite + SWC |
 | Styling | Tailwind CSS + shadcn/ui |
@@ -111,7 +113,7 @@ Open [http://localhost:5173](http://localhost:5173).
 ## Scripts
 
 | Command | Description |
-| ------- | ----------- |
+|---|---|
 | `npm run dev` | Start the dev server |
 | `npm run build` | Build for production |
 | `npm run preview` | Preview the production build |
