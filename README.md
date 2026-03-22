@@ -110,6 +110,18 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173).
 
+## Install as a Browser Extension (Chrome / Edge / Brave)
+
+JSON Lens can be installed as a local browser extension. Once installed, clicking the extension icon instantly opens the JSON Lens workspace in a new tab.
+
+1. Build the project first:
+   ```bash
+   npm run build
+   ```
+2. Open your browser and navigate to `chrome://extensions/` (or equivalent).
+3. Enable **Developer mode** in the top right corner.
+4. Click **Load unpacked** and select the generated `dist` folder inside the project directory.
+
 ## Scripts
 
 | Command | Description |
