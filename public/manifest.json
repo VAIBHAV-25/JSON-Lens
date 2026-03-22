@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "JSON Lens",
+  "version": "1.0.0",
+  "description": "A beautiful, interactive, and powerful JSON viewer and analyzer for developers.",
+  "action": {
+    "default_title": "Open JSON Lens"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
