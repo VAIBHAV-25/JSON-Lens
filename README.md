@@ -1,6 +1,6 @@
 # JSON Lens
 
-JSON Lens is a local-first JSON workspace for inspecting, transforming, comparing, and understanding JSON. It runs entirely in the browser — no backend, no uploads, no account required.
+JSON Lens is a local-first JSON workspace for inspecting, transforming, comparing, and understanding JSON. It runs entirely in the browser — no backend, no uploads, no account required. **It can also be installed as a Chrome/Edge browser extension!**
 
 ## Features
 
