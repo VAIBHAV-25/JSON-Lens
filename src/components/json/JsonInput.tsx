@@ -249,7 +249,7 @@ export default function JsonInput() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Primary toolbar — single row, never wraps */}
-      <div className="flex flex-nowrap items-center gap-1 px-2 py-1.5 border-b surface-1 flex-shrink-0 overflow-x-auto scrollbar-none">
+      <div className="flex flex-nowrap items-center gap-1 px-2 py-1.5 border-b surface-1 flex-shrink-0 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {/* ── Input sources ── */}
         <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()} className="gap-1 text-xs h-7 px-2 flex-shrink-0 whitespace-nowrap">
           <Upload className="w-3.5 h-3.5" />
@@ -258,10 +258,6 @@ export default function JsonInput() {
         <Button variant="ghost" size="sm" onClick={() => setShowUrlInput(!showUrlInput)} className="gap-1 text-xs h-7 px-2 flex-shrink-0 whitespace-nowrap">
           <Link className="w-3.5 h-3.5" />
           <span className="hidden md:inline">URL</span>
-        </Button>
-        <Button variant="ghost" size="sm" onClick={() => setRawInput(SAMPLE_JSON)} className="gap-1 text-xs h-7 px-2 flex-shrink-0 whitespace-nowrap">
-          <FileJson className="w-3.5 h-3.5" />
-          <span className="hidden md:inline">Sample</span>
         </Button>
         <Sheet open={shelfOpen} onOpenChange={handleShelfOpenChange}>
           <SheetTrigger asChild>
@@ -498,16 +494,26 @@ export default function JsonInput() {
               <p className="text-sm font-medium text-muted-foreground/70">Paste JSON or drag & drop a file</p>
               <p className="text-xs text-muted-foreground/40">Supports .json files up to any size</p>
             </div>
-            {showShelfHint && (
+            <div className="flex items-center justify-center gap-3">
               <button
                 type="button"
-                onClick={() => handleShelfOpenChange(true)}
-                className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/8 px-3 py-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400"
+                onClick={() => setRawInput(SAMPLE_JSON)}
+                className="pointer-events-auto inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-xs font-medium text-foreground shadow-sm hover:bg-muted"
               >
-                <FolderOpen className="w-3.5 h-3.5" />
-                Open Shelf
+                <FileJson className="w-3.5 h-3.5" />
+                Load Sample
               </button>
-            )}
+              {showShelfHint && (
+                <button
+                  type="button"
+                  onClick={() => handleShelfOpenChange(true)}
+                  className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/8 px-3 py-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400"
+                >
+                  <FolderOpen className="w-3.5 h-3.5" />
+                  Open Shelf
+                </button>
+              )}
+            </div>
           </div>
         )}
         <textarea
