@@ -9,12 +9,12 @@ function highlightToonContent(content: string) {
   const tokens = content.split(/(\b(?:true|false|null)\b|-?\b\d+(?:\.\d+)?\b|,|"[^"]*")/g);
   return tokens.map((part, i) => {
     if (!part) return null;
-    if (part === 'true' || part === 'false') return <span key={i} className="text-orange-400 font-semibold drop-shadow-sm">{part}</span>;
-    if (part === 'null') return <span key={i} className="text-slate-500 italic drop-shadow-sm">{part}</span>;
-    if (/^-?\d+(?:\.\d+)?$/.test(part)) return <span key={i} className="text-amber-400 drop-shadow-sm">{part}</span>;
+    if (part === 'true' || part === 'false') return <span key={i} className="text-orange-600 dark:text-orange-400 font-semibold">{part}</span>;
+    if (part === 'null') return <span key={i} className="text-slate-500 dark:text-slate-400 italic">{part}</span>;
+    if (/^-?\d+(?:\.\d+)?$/.test(part)) return <span key={i} className="text-amber-600 dark:text-amber-400">{part}</span>;
     if (part === ',') return <span key={i} className="text-muted-foreground/40">{part}</span>;
-    if (part.startsWith('"') && part.endsWith('"')) return <span key={i} className="text-emerald-400/90">{part}</span>;
-    return <span key={i} className="text-emerald-400 drop-shadow-sm">{part}</span>;
+    if (part.startsWith('"') && part.endsWith('"')) return <span key={i} className="text-emerald-600 dark:text-emerald-400">{part}</span>;
+    return <span key={i} className="text-emerald-600 dark:text-emerald-400">{part}</span>;
   });
 }
 
@@ -22,12 +22,12 @@ function HighlightedToon({ toonString }: { toonString: string }) {
   const lines = toonString.split('\n');
 
   return (
-    <div className="font-mono text-[13px] leading-relaxed text-foreground/90 bg-card/60 backdrop-blur-md rounded-xl border border-border/50 shadow-lg overflow-hidden flex flex-col m-3 h-[calc(100%-1.5rem)] relative">
-      <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-br from-fuchsia-500/10 to-pink-500/5 border-b border-border/40">
-        <Sparkles className="w-4 h-4 text-fuchsia-400" />
-        <span className="text-xs font-bold text-fuchsia-100/90 tracking-wide uppercase">TOON Format</span>
+    <div className="font-mono text-[13px] leading-relaxed text-foreground bg-card rounded-xl border border-border shadow-md overflow-hidden flex flex-col m-3 h-[calc(100%-1.5rem)] relative">
+      <div className="flex items-center gap-2 px-4 py-2 bg-fuchsia-500/10 border-b border-border/50">
+        <Sparkles className="w-4 h-4 text-fuchsia-600 dark:text-fuchsia-400" />
+        <span className="text-xs font-bold text-fuchsia-700 dark:text-fuchsia-300 tracking-wide uppercase">TOON Format</span>
       </div>
-      <div className="flex-1 overflow-auto bg-[#0d1117]/80 scrollbar-thin">
+      <div className="flex-1 overflow-auto bg-background scrollbar-thin">
         <div className="min-w-max py-4">
           <div className="table w-full border-collapse">
             {lines.map((line, index) => {
@@ -39,18 +39,18 @@ function HighlightedToon({ toonString }: { toonString: string }) {
               const arrHeaderMatch = content.match(/^([^\[]+)\[(\d+)\]\{([^}]+)\}:$/);
               if (arrHeaderMatch) {
                 return (
-                  <div key={index} className="table-row hover:bg-white/5 transition-colors group">
-                    <span className="table-cell text-muted-foreground/30 group-hover:text-muted-foreground/50 select-none pr-4 pl-4 text-right w-12 border-r border-border/10 text-[11px] align-middle">{index + 1}</span>
+                  <div key={index} className="table-row hover:bg-black/5 dark:hover:bg-white/5 transition-colors group">
+                    <span className="table-cell text-muted-foreground/40 group-hover:text-muted-foreground/60 select-none pr-4 pl-4 text-right w-12 border-r border-border/40 text-[11px] align-middle">{index + 1}</span>
                     <span className="table-cell pl-4 pr-6 align-middle py-0.5 whitespace-pre">
                       {indent}
-                      <span className="text-fuchsia-400 font-semibold drop-shadow-sm">{arrHeaderMatch[1]}</span>
+                      <span className="text-fuchsia-600 dark:text-fuchsia-400 font-semibold">{arrHeaderMatch[1]}</span>
                       <span className="text-muted-foreground/50">[</span>
-                      <span className="text-sky-400 font-semibold drop-shadow-sm">{arrHeaderMatch[2]}</span>
+                      <span className="text-sky-600 dark:text-sky-400 font-semibold">{arrHeaderMatch[2]}</span>
                       <span className="text-muted-foreground/50">]</span>
                       <span className="text-muted-foreground/50">{"{"}</span>
-                      <span className="text-orange-300/90">{arrHeaderMatch[3]}</span>
+                      <span className="text-orange-600 dark:text-orange-400">{arrHeaderMatch[3]}</span>
                       <span className="text-muted-foreground/50">{"}"}</span>
-                      <span className="text-fuchsia-400/80">:</span>
+                      <span className="text-fuchsia-600/80 dark:text-fuchsia-400/80">:</span>
                     </span>
                   </div>
                 );
@@ -59,12 +59,12 @@ function HighlightedToon({ toonString }: { toonString: string }) {
               const keyMatch = content.match(/^([^:]+):$/);
               if (keyMatch) {
                 return (
-                  <div key={index} className="table-row hover:bg-white/5 transition-colors group">
-                    <span className="table-cell text-muted-foreground/30 group-hover:text-muted-foreground/50 select-none pr-4 pl-4 text-right w-12 border-r border-border/10 text-[11px] align-middle">{index + 1}</span>
+                  <div key={index} className="table-row hover:bg-black/5 dark:hover:bg-white/5 transition-colors group">
+                    <span className="table-cell text-muted-foreground/40 group-hover:text-muted-foreground/60 select-none pr-4 pl-4 text-right w-12 border-r border-border/40 text-[11px] align-middle">{index + 1}</span>
                     <span className="table-cell pl-4 pr-6 align-middle py-0.5 whitespace-pre">
                       {indent}
-                      <span className="text-fuchsia-400 font-semibold drop-shadow-sm">{keyMatch[1]}</span>
-                      <span className="text-fuchsia-400/80">:</span>
+                      <span className="text-fuchsia-600 dark:text-fuchsia-400 font-semibold">{keyMatch[1]}</span>
+                      <span className="text-fuchsia-600/80 dark:text-fuchsia-400/80">:</span>
                     </span>
                   </div>
                 );
@@ -73,12 +73,12 @@ function HighlightedToon({ toonString }: { toonString: string }) {
               const kvMatch = content.match(/^([^:]+):\s+(.*)$/);
               if (kvMatch) {
                 return (
-                  <div key={index} className="table-row hover:bg-white/5 transition-colors group">
-                    <span className="table-cell text-muted-foreground/30 group-hover:text-muted-foreground/50 select-none pr-4 pl-4 text-right w-12 border-r border-border/10 text-[11px] align-middle">{index + 1}</span>
+                  <div key={index} className="table-row hover:bg-black/5 dark:hover:bg-white/5 transition-colors group">
+                    <span className="table-cell text-muted-foreground/40 group-hover:text-muted-foreground/60 select-none pr-4 pl-4 text-right w-12 border-r border-border/40 text-[11px] align-middle">{index + 1}</span>
                     <span className="table-cell pl-4 pr-6 align-middle py-0.5 whitespace-pre">
                       {indent}
-                      <span className="text-fuchsia-400 drop-shadow-sm">{kvMatch[1]}</span>
-                      <span className="text-fuchsia-400/80">: </span>
+                      <span className="text-fuchsia-600 dark:text-fuchsia-400">{kvMatch[1]}</span>
+                      <span className="text-fuchsia-600/80 dark:text-fuchsia-400/80">: </span>
                       {highlightToonContent(kvMatch[2])}
                     </span>
                   </div>
@@ -86,8 +86,8 @@ function HighlightedToon({ toonString }: { toonString: string }) {
               }
 
               return (
-                <div key={index} className="table-row hover:bg-white/5 transition-colors group">
-                  <span className="table-cell text-muted-foreground/30 group-hover:text-muted-foreground/50 select-none pr-4 pl-4 text-right w-12 border-r border-border/10 text-[11px] align-middle">{index + 1}</span>
+                <div key={index} className="table-row hover:bg-black/5 dark:hover:bg-white/5 transition-colors group">
+                  <span className="table-cell text-muted-foreground/40 group-hover:text-muted-foreground/60 select-none pr-4 pl-4 text-right w-12 border-r border-border/40 text-[11px] align-middle">{index + 1}</span>
                   <span className="table-cell pl-4 pr-6 align-middle py-0.5 whitespace-pre">
                     {indent}
                     {content ? highlightToonContent(content) : <span className="inline-block h-4" />}
@@ -106,23 +106,23 @@ function highlightJsonTokens(content: string) {
   const tokens = content.split(/("[^"]*"\s*:|"[^"]*"|-?\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b|\btrue\b|\bfalse\b|\bnull\b|[{}\[\]:,])/g);
   return tokens.map((part, i) => {
     if (!part) return null;
-    if (part === 'true' || part === 'false') return <span key={i} className="text-orange-400 font-semibold">{part}</span>;
-    if (part === 'null') return <span key={i} className="text-slate-500 italic">{part}</span>;
-    if (/^-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$/.test(part)) return <span key={i} className="text-amber-400">{part}</span>;
+    if (part === 'true' || part === 'false') return <span key={i} className="text-orange-600 dark:text-orange-400 font-semibold">{part}</span>;
+    if (part === 'null') return <span key={i} className="text-slate-500 dark:text-slate-400 italic">{part}</span>;
+    if (/^-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$/.test(part)) return <span key={i} className="text-amber-600 dark:text-amber-400">{part}</span>;
     
     // Key (like "name":)
     const keyMatch = part.match(/^("[^"]*")(\s*:)$/);
     if (keyMatch) {
       return (
         <span key={i}>
-          <span className="text-indigo-300 font-medium">{keyMatch[1]}</span>
+          <span className="text-indigo-600 dark:text-indigo-300 font-medium">{keyMatch[1]}</span>
           <span className="text-muted-foreground/60">{keyMatch[2]}</span>
         </span>
       );
     }
     
-    if (part.startsWith('"') && part.endsWith('"')) return <span key={i} className="text-emerald-400">{part}</span>;
-    if (part === '{' || part === '}' || part === '[' || part === ']') return <span key={i} className="text-sky-400/70">{part}</span>;
+    if (part.startsWith('"') && part.endsWith('"')) return <span key={i} className="text-emerald-600 dark:text-emerald-400">{part}</span>;
+    if (part === '{' || part === '}' || part === '[' || part === ']') return <span key={i} className="text-sky-600 dark:text-sky-400">{part}</span>;
     if (part === ',' || part === ':') return <span key={i} className="text-muted-foreground/60">{part}</span>;
     
     return <span key={i} className="text-foreground/80">{part}</span>;
@@ -133,17 +133,17 @@ function HighlightedJson({ jsonString }: { jsonString: string }) {
   const lines = jsonString.split('\n');
 
   return (
-    <div className="font-mono text-[13px] leading-relaxed text-foreground/90 bg-card/40 backdrop-blur-sm rounded-xl border border-border/40 shadow-sm overflow-hidden flex flex-col m-3 h-[calc(100%-1.5rem)]">
-      <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-br from-indigo-500/10 to-blue-500/5 border-b border-border/30">
-        <Code2 className="w-4 h-4 text-indigo-400" />
-        <span className="text-xs font-bold text-indigo-200/90 tracking-wide uppercase">JSON Format</span>
+    <div className="font-mono text-[13px] leading-relaxed text-foreground bg-card rounded-xl border border-border shadow-sm overflow-hidden flex flex-col m-3 h-[calc(100%-1.5rem)] relative">
+      <div className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border-b border-border/50">
+        <Code2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+        <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 tracking-wide uppercase">JSON Format</span>
       </div>
-      <div className="flex-1 overflow-auto bg-[#0d1117]/60 scrollbar-thin">
+      <div className="flex-1 overflow-auto bg-background scrollbar-thin">
         <div className="min-w-max py-4">
           <div className="table w-full border-collapse">
             {lines.map((line, index) => (
-              <div key={index} className="table-row hover:bg-white/5 transition-colors group">
-                <span className="table-cell text-muted-foreground/30 group-hover:text-muted-foreground/50 select-none pr-4 pl-4 text-right w-12 border-r border-border/10 text-[11px] align-middle">{index + 1}</span>
+              <div key={index} className="table-row hover:bg-black/5 dark:hover:bg-white/5 transition-colors group">
+                <span className="table-cell text-muted-foreground/40 group-hover:text-muted-foreground/60 select-none pr-4 pl-4 text-right w-12 border-r border-border/40 text-[11px] align-middle">{index + 1}</span>
                 <span className="table-cell pl-4 pr-6 align-middle py-0.5 whitespace-pre">
                   {line ? highlightJsonTokens(line) : <span className="inline-block h-4" />}
                 </span>
@@ -205,7 +205,7 @@ export default function JsonToon() {
         <div className="relative">
           <div className="absolute inset-0 bg-fuchsia-500/20 blur-xl rounded-full" />
           <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-fuchsia-500/10 to-pink-500/10 border border-fuchsia-500/20 flex items-center justify-center shadow-lg shadow-fuchsia-500/5">
-            <FileText className="w-8 h-8 text-fuchsia-400 drop-shadow-md" />
+            <FileText className="w-8 h-8 text-fuchsia-600 dark:text-fuchsia-400 drop-shadow-md" />
           </div>
         </div>
         <div className="text-center space-y-1.5">
@@ -217,20 +217,20 @@ export default function JsonToon() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-background via-background to-fuchsia-950/5 overflow-hidden">
+    <div className="flex flex-col h-full bg-muted/30 dark:bg-gradient-to-br dark:from-background dark:via-background dark:to-fuchsia-950/5 overflow-hidden">
       {/* ── Toolbar ── */}
       <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 border-b bg-card/40 backdrop-blur-md flex-shrink-0 shadow-sm z-10 relative border-border/40">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-fuchsia-500/20 to-pink-500/20 border border-fuchsia-500/30 flex items-center justify-center shadow-inner">
-            <Sparkles className="w-3.5 h-3.5 text-fuchsia-400 drop-shadow-sm" />
+            <Sparkles className="w-3.5 h-3.5 text-fuchsia-600 dark:text-fuchsia-400 drop-shadow-sm" />
           </div>
           <span className="text-xs font-bold text-foreground/90 tracking-wide">TOON Sandbox</span>
         </div>
         
         {savings > 0 && (
           <div className="ml-4 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-1.5 shadow-sm">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-            <span className="text-[10px] font-bold text-emerald-400 tracking-wide uppercase">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 tracking-wide uppercase">
               {savings}% Text Reduction
             </span>
           </div>
@@ -242,10 +242,10 @@ export default function JsonToon() {
           <button
             onClick={copyToClipboard}
             title="Copy TOON"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold border border-fuchsia-500/20 bg-fuchsia-500/5 hover:bg-fuchsia-500/15 text-fuchsia-400 transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold border border-fuchsia-500/20 bg-fuchsia-500/5 hover:bg-fuchsia-500/15 text-fuchsia-600 dark:text-fuchsia-400 transition-all shadow-sm"
           >
             {copied ? (
-              <span className="font-bold flex items-center gap-1">✓ Copied</span>
+              <span className="font-bold flex items-center gap-1 text-emerald-600 dark:text-emerald-400">✓ Copied</span>
             ) : (
               <>
                 <Copy className="w-3.5 h-3.5" /> Copy TOON
@@ -265,13 +265,13 @@ export default function JsonToon() {
       {/* ── Side by Side Workspace ── */}
       <div className="flex-1 overflow-hidden relative flex flex-col">
         {toonString.startsWith('Error') ? (
-          <div className="p-4 text-red-400 text-sm font-mono whitespace-pre-wrap">{toonString}</div>
+          <div className="p-4 text-red-500 dark:text-red-400 text-sm font-mono whitespace-pre-wrap">{toonString}</div>
         ) : (
           <>
             {/* ── Info Banner ── */}
             <div className="mx-3 mt-3 px-4 py-3 bg-fuchsia-500/5 rounded-xl border border-fuchsia-500/15 flex gap-3 text-sm shadow-sm shrink-0">
               <div className="shrink-0 pt-0.5">
-                <Info className="w-4 h-4 text-fuchsia-400/80" />
+                <Info className="w-4 h-4 text-fuchsia-600 dark:text-fuchsia-400/80" />
               </div>
               <div className="text-muted-foreground/90 space-y-1 leading-relaxed">
                 <p>
@@ -290,9 +290,9 @@ export default function JsonToon() {
                   <HighlightedJson jsonString={jsonString} />
                 </Panel>
                 
-                <PanelResizeHandle className="w-2 relative group cursor-col-resize flex flex-col justify-center">
+                <PanelResizeHandle className="w-4 ml-[-4px] mr-[-4px] relative group cursor-col-resize flex flex-col justify-center">
                   <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-border/40 group-hover:bg-fuchsia-500/50 transition-colors" />
-                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-card border border-border shadow-sm w-4 h-6 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-background border border-border shadow-sm w-4 h-[32px] flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-all duration-200">
                     <MoveHorizontal className="w-2.5 h-2.5 text-muted-foreground" />
                   </div>
                 </PanelResizeHandle>
