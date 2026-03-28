@@ -1,25 +1,46 @@
 import { useMemo, useState } from 'react';
 import { useJsonStore } from '@/stores/jsonStore';
 import { diffJson, DiffEntry } from '@/utils/diffUtils';
-import { ArrowLeftRight, Edit3, GitCompare, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeftRight, GitCompare, Check, ChevronDown, ChevronUp } from 'lucide-react';
 
 // ── Visual config ─────────────────────────────────────────────────────────────
 const DS = {
-  added:    { bg: 'rgba(52,211,153,0.13)',  border: '#34d399', sign: '+', clr: '#34d399', label: 'Added',    badgeBg: 'rgba(52,211,153,0.18)'  },
-  removed:  { bg: 'rgba(248,113,113,0.11)', border: '#f87171', sign: '−', clr: '#f87171', label: 'Removed',  badgeBg: 'rgba(248,113,113,0.18)' },
-  modified: { bg: 'rgba(251,191,36,0.10)',  border: '#fbbf24', sign: '~', clr: '#fbbf24', label: 'Modified', badgeBg: 'rgba(251,191,36,0.15)'  },
+  added: {
+    bgClass: 'bg-emerald-500/10 dark:bg-emerald-500/15',
+    borderClass: 'border-emerald-500/60 dark:border-emerald-400/60',
+    sign: '+',
+    clrClass: 'text-emerald-600 dark:text-emerald-400',
+    label: 'Added',
+    badgeClass: 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 dark:border-emerald-500/40'
+  },
+  removed: {
+    bgClass: 'bg-red-500/10 dark:bg-red-500/15',
+    borderClass: 'border-red-500/60 dark:border-red-400/60',
+    sign: '−',
+    clrClass: 'text-red-600 dark:text-red-400',
+    label: 'Removed',
+    badgeClass: 'bg-red-500/10 dark:bg-red-500/20 text-red-700 dark:text-red-400 border-red-500/30 dark:border-red-500/40'
+  },
+  modified: {
+    bgClass: 'bg-amber-500/10 dark:bg-amber-500/15',
+    borderClass: 'border-amber-500/60 dark:border-amber-400/60',
+    sign: '~',
+    clrClass: 'text-amber-600 dark:text-amber-400',
+    label: 'Modified',
+    badgeClass: 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-500/30 dark:border-amber-500/40'
+  },
 } as const;
 
 const SC = {
-  key:    '#c4b5fd',
-  str:    '#86efac',
-  num:    '#fbbf24',
-  tru:    '#4ade80',
-  fls:    '#f87171',
-  nil:    '#94a3b8',
-  brack:  '#64748b',
-  comma:  '#475569',
-  colon:  '#475569',
+  key:    'text-indigo-600 dark:text-indigo-300',
+  str:    'text-emerald-600 dark:text-emerald-400',
+  num:    'text-amber-600 dark:text-amber-400',
+  tru:    'text-orange-600 dark:text-orange-400',
+  fls:    'text-red-600 dark:text-red-400',
+  nil:    'text-slate-500 dark:text-slate-400',
+  brack:  'text-slate-500 dark:text-slate-400',
+  comma:  'text-muted-foreground/60',
+  colon:  'text-muted-foreground/60',
 };
 
 const INDENT_PX = 14;
@@ -43,30 +64,13 @@ function JsonLine({
 
   const pl = indent * INDENT_PX + 20;
 
-  const rowStyle: React.CSSProperties = {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    minHeight: 24,
-    paddingLeft: pl,
-    paddingRight: 16,
-    paddingTop: 1,
-    paddingBottom: 1,
-    background: ds ? ds.bg : 'transparent',
-    borderLeft: ds
-      ? `3px solid ${ds.border}`
-      : isParent
-        ? '3px solid rgba(255,255,255,0.07)'
-        : '3px solid transparent',
-    transition: 'background 0.2s',
-  };
+  const rowClasses = `relative flex items-center min-h-[24px] pr-4 py-[1px] transition-colors border-l-[3px] ${
+    ds ? `${ds.bgClass} ${ds.borderClass}` :
+    isParent ? 'bg-transparent border-black/10 dark:border-white/10' : 'bg-transparent border-transparent'
+  }`;
 
   const gutter = (
-    <span style={{
-      position: 'absolute', left: 4, width: 14, textAlign: 'center',
-      fontSize: 11, fontWeight: 800, color: ds ? ds.clr : 'transparent',
-      userSelect: 'none', lineHeight: '24px',
-    }}>
+    <span className={`absolute left-1 w-[14px] text-center text-[11px] font-extrabold select-none leading-[24px] ${ds?.clrClass || 'text-transparent'}`}>
       {ds?.sign}
     </span>
   );
@@ -74,27 +78,23 @@ function JsonLine({
   const keyEl = keyName !== undefined ? (
     <>
       {typeof keyName === 'number'
-        ? <span style={{ color: SC.num }}>[{keyName}]</span>
-        : <span style={{ color: SC.key }}>"{keyName}"</span>}
-      <span style={{ color: SC.colon }}>:&nbsp;</span>
+        ? <span className={SC.num}>[{keyName}]</span>
+        : <span className={SC.key}>"{keyName}"</span>}
+      <span className={SC.colon}>:&nbsp;</span>
     </>
   ) : null;
 
-  const closeRowStyle: React.CSSProperties = {
-    ...rowStyle,
-    background: 'transparent',
-    borderLeft: '3px solid transparent',
-  };
+  const closeRowClasses = `relative flex items-center min-h-[24px] pr-4 py-[1px] transition-colors bg-transparent border-l-[3px] border-transparent`;
 
   // Object
   if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
     const entries = Object.entries(value as Record<string, unknown>);
     return (
       <div>
-        <div style={rowStyle}>
+        <div className={rowClasses} style={{ paddingLeft: pl }}>
           {gutter}
           {keyEl}
-          <span style={{ color: SC.brack }}>{'{'}</span>
+          <span className={SC.brack}>{'{'}</span>
         </div>
         {entries.map(([k, v], i) => (
           <JsonLine key={k} value={v} keyName={k}
@@ -103,9 +103,9 @@ function JsonLine({
             isLast={i === entries.length - 1}
           />
         ))}
-        <div style={{ ...closeRowStyle, paddingLeft: pl }}>
-          <span style={{ color: SC.brack }}>{'}'}</span>
-          {!isLast && <span style={{ color: SC.comma }}>,</span>}
+        <div className={closeRowClasses} style={{ paddingLeft: pl }}>
+          <span className={SC.brack}>{'}'}</span>
+          {!isLast && <span className={SC.comma}>,</span>}
         </div>
       </div>
     );
@@ -115,10 +115,10 @@ function JsonLine({
   if (Array.isArray(value)) {
     return (
       <div>
-        <div style={rowStyle}>
+        <div className={rowClasses} style={{ paddingLeft: pl }}>
           {gutter}
           {keyEl}
-          <span style={{ color: SC.brack }}>{'['}</span>
+          <span className={SC.brack}>{'['}</span>
         </div>
         {value.map((item, i) => (
           <JsonLine key={i} value={item} keyName={i}
@@ -127,9 +127,9 @@ function JsonLine({
             isLast={i === value.length - 1}
           />
         ))}
-        <div style={{ ...closeRowStyle, paddingLeft: pl }}>
-          <span style={{ color: SC.brack }}>{']'}</span>
-          {!isLast && <span style={{ color: SC.comma }}>,</span>}
+        <div className={closeRowClasses} style={{ paddingLeft: pl }}>
+          <span className={SC.brack}>{']'}</span>
+          {!isLast && <span className={SC.comma}>,</span>}
         </div>
       </div>
     );
@@ -138,23 +138,23 @@ function JsonLine({
   // Primitives
   let valEl: React.ReactElement;
   if (value === null) {
-    valEl = <span style={{ color: SC.nil }}>null</span>;
+    valEl = <span className={SC.nil}>null</span>;
   } else if (typeof value === 'boolean') {
-    valEl = <span style={{ color: value ? SC.tru : SC.fls }}>{String(value)}</span>;
+    valEl = <span className={value ? SC.tru : SC.fls}>{String(value)}</span>;
   } else if (typeof value === 'number') {
-    valEl = <span style={{ color: SC.num }}>{String(value)}</span>;
+    valEl = <span className={SC.num}>{String(value)}</span>;
   } else {
     const s = value as string;
     const display = s.length > 80 ? `"${s.slice(0, 78)}…"` : JSON.stringify(s);
-    valEl = <span style={{ color: SC.str }}>{display}</span>;
+    valEl = <span className={SC.str}>{display}</span>;
   }
 
   return (
-    <div style={rowStyle}>
+    <div className={rowClasses} style={{ paddingLeft: pl }}>
       {gutter}
       {keyEl}
       {valEl}
-      {!isLast && <span style={{ color: SC.comma }}>,</span>}
+      {!isLast && <span className={SC.comma}>,</span>}
     </div>
   );
 }
@@ -212,44 +212,41 @@ export default function JsonDiff() {
   };
 
   return (
-    <div className="flex flex-col h-full" style={{ background: '#07091a' }}>
+    <div className="flex flex-col h-full bg-background dark:bg-[#07091a]">
 
       {/* ── Header ── */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b shrink-0"
-        style={{ background: 'linear-gradient(135deg, rgba(129,140,248,0.12) 0%, rgba(56,189,248,0.07) 100%)', borderColor: 'rgba(255,255,255,0.07)' }}>
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/60 shrink-0 bg-indigo-50/50 dark:bg-gradient-to-br dark:from-indigo-500/10 dark:to-sky-500/5">
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-            style={{ background: 'rgba(129,140,248,0.2)', border: '1px solid rgba(129,140,248,0.45)', boxShadow: '0 0 12px rgba(129,140,248,0.2)' }}>
-            <GitCompare className="w-3.5 h-3.5" style={{ color: '#818cf8' }} />
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-indigo-100 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-400/50 shadow-sm dark:shadow-[0_0_12px_rgba(129,140,248,0.2)]">
+            <GitCompare className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
           </div>
-          <span className="font-semibold text-sm" style={{ color: 'rgba(255,255,255,0.85)' }}>JSON Compare</span>
+          <span className="font-semibold text-sm text-foreground/90 dark:text-white/85">JSON Compare</span>
 
           {/* Stats badges */}
           {stats && stats.total > 0 && (
             <div className="flex items-center gap-1.5">
               {stats.added > 0 && (
-                <span className="diff-badge-added px-2 py-0.5 rounded-full text-xs font-bold">
+                <span className={`diff-badge-added px-2 py-0.5 rounded-full text-xs font-bold ${DS.added.badgeClass}`}>
                   +{stats.added}
                 </span>
               )}
               {stats.removed > 0 && (
-                <span className="diff-badge-removed px-2 py-0.5 rounded-full text-xs font-bold">
+                <span className={`diff-badge-removed px-2 py-0.5 rounded-full text-xs font-bold ${DS.removed.badgeClass}`}>
                   −{stats.removed}
                 </span>
               )}
               {stats.modified > 0 && (
-                <span className="diff-badge-modified px-2 py-0.5 rounded-full text-xs font-bold">
+                <span className={`diff-badge-modified px-2 py-0.5 rounded-full text-xs font-bold ${DS.modified.badgeClass}`}>
                   ~{stats.modified}
                 </span>
               )}
-              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              <span className="text-xs text-muted-foreground/60 dark:text-white/30">
                 {stats.total} change{stats.total !== 1 ? 's' : ''}
               </span>
             </div>
           )}
           {diffs?.length === 0 && (
-            <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
-              style={{ background: 'rgba(52,211,153,0.15)', color: '#34d399', border: '1px solid rgba(52,211,153,0.3)' }}>
+            <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
               <Check className="w-3 h-3" /> Identical
             </span>
           )}
@@ -272,69 +269,64 @@ export default function JsonDiff() {
 
       {/* ── Input panels ── */}
       {inputOpen && (
-        <div className="grid grid-cols-2 shrink-0 border-b" style={{ borderColor: 'rgba(255,255,255,0.07)', height: 200 }}>
+        <div className="grid grid-cols-2 shrink-0 border-b border-border/60" style={{ height: 200 }}>
           {/* Left */}
-          <div className="flex flex-col border-r" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
-            <div className="flex items-center justify-between px-3 py-1.5 border-b shrink-0"
-              style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
-              <span className="text-xs font-semibold tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>ORIGINAL</span>
+          <div className="flex flex-col border-r border-border/60 bg-muted/10">
+            <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/60 shrink-0 bg-muted/30 dark:bg-white/5">
+              <span className="text-xs font-semibold tracking-wide text-muted-foreground">ORIGINAL</span>
               {parsedDiffLeft
-                ? <span className="text-xs font-medium" style={{ color: '#34d399' }}>✓ Valid</span>
+                ? <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">✓ Valid</span>
                 : diffLeft
-                  ? <span className="text-xs font-medium" style={{ color: '#f87171' }}>✗ Invalid JSON</span>
-                  : <span className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Paste JSON…</span>}
+                  ? <span className="text-xs font-medium text-red-500 dark:text-red-400">✗ Invalid JSON</span>
+                  : <span className="text-xs text-muted-foreground/50">Paste JSON…</span>}
             </div>
             <textarea
               value={diffLeft}
               onChange={e => setDiffLeft(e.target.value)}
               placeholder={'{\n  "key": "value"\n}'}
               spellCheck={false}
-              className="flex-1 p-3 bg-transparent font-mono text-xs resize-none outline-none"
-              style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, caretColor: '#818cf8' }}
+              className="flex-1 p-3 bg-transparent font-mono text-xs resize-none outline-none text-foreground/80 placeholder:text-muted-foreground/40 caret-indigo-500 dark:caret-indigo-400 leading-relaxed"
             />
           </div>
 
           {/* Right */}
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between px-3 py-1.5 border-b shrink-0"
-              style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
-              <span className="text-xs font-semibold tracking-wide" style={{ color: 'rgba(255,255,255,0.4)' }}>MODIFIED</span>
+          <div className="flex flex-col bg-muted/10">
+            <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/60 shrink-0 bg-muted/30 dark:bg-white/5">
+              <span className="text-xs font-semibold tracking-wide text-muted-foreground">MODIFIED</span>
               {parsedDiffRight
-                ? <span className="text-xs font-medium" style={{ color: '#34d399' }}>✓ Valid</span>
+                ? <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">✓ Valid</span>
                 : diffRight
-                  ? <span className="text-xs font-medium" style={{ color: '#f87171' }}>✗ Invalid JSON</span>
-                  : <span className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Paste JSON…</span>}
+                  ? <span className="text-xs font-medium text-red-500 dark:text-red-400">✗ Invalid JSON</span>
+                  : <span className="text-xs text-muted-foreground/50">Paste JSON…</span>}
             </div>
             <textarea
               value={diffRight}
               onChange={e => setDiffRight(e.target.value)}
               placeholder={'{\n  "key": "new_value"\n}'}
               spellCheck={false}
-              className="flex-1 p-3 bg-transparent font-mono text-xs resize-none outline-none"
-              style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.7, caretColor: '#818cf8' }}
+              className="flex-1 p-3 bg-transparent font-mono text-xs resize-none outline-none text-foreground/80 placeholder:text-muted-foreground/40 caret-indigo-500 dark:caret-indigo-400 leading-relaxed"
             />
           </div>
         </div>
       )}
 
       {/* ── Diff body ── */}
-      <div className="flex-1 min-h-0 overflow-auto">
+      <div className="flex-1 min-h-0 overflow-auto bg-card dark:bg-transparent">
 
         {/* Empty state */}
         {!bothValid && (
-          <div className="flex flex-col items-center justify-center h-full gap-4">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center"
-              style={{ background: 'rgba(129,140,248,0.1)', border: '1px solid rgba(129,140,248,0.25)' }}>
-              <GitCompare className="w-8 h-8" style={{ color: 'rgba(129,140,248,0.6)' }} />
+          <div className="flex flex-col items-center justify-center h-full gap-4 bg-muted/5 dark:bg-transparent">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/25 shadow-sm">
+              <GitCompare className="w-8 h-8 text-indigo-400 dark:text-indigo-400/60" />
             </div>
             <div className="text-center space-y-1">
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, fontWeight: 500 }}>Paste valid JSON on both sides</p>
-              <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12 }}>Differences will be highlighted inline</p>
+              <p className="text-[14px] font-medium text-foreground/70 dark:text-white/50">Paste valid JSON on both sides</p>
+              <p className="text-xs text-muted-foreground/60 dark:text-white/25">Differences will be highlighted inline</p>
             </div>
-            <div className="flex items-center gap-4 text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            <div className="flex items-center gap-4 text-xs text-muted-foreground/70 dark:text-white/30">
               {Object.entries(DS).map(([type, cfg]) => (
                 <span key={type} className="flex items-center gap-1.5">
-                  <span style={{ width: 8, height: 8, borderRadius: 2, background: cfg.border, display: 'inline-block', opacity: 0.8 }} />
+                  <span className={`w-2 h-2 rounded-sm opacity-80 ${cfg.bgClass}`} />
                   {cfg.sign} {cfg.label}
                 </span>
               ))}
@@ -345,23 +337,21 @@ export default function JsonDiff() {
         {bothValid && diffs && (
           <>
             {/* ── Side-by-side rendered JSON ── */}
-            <div className="grid grid-cols-2 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+            <div className="grid grid-cols-2 border-b border-border/60">
 
               {/* Left panel */}
-              <div className="border-r" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-                <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 border-b"
-                  style={{ background: 'rgba(7,9,26,0.96)', borderColor: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(8px)' }}>
-                  <span className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.5)' }}>Original</span>
+              <div className="border-r border-border/60 relative">
+                <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 border-b border-border/60 bg-card/90 dark:bg-[#07091a]/96 backdrop-blur-md">
+                  <span className="text-xs font-semibold text-muted-foreground">Original</span>
                   {stats && (stats.removed + stats.modified) > 0 && (
-                    <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-semibold"
-                      style={{ background: 'rgba(248,113,113,0.15)', color: '#f87171', border: '1px solid rgba(248,113,113,0.25)' }}>
+                    <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-semibold bg-red-500/10 dark:bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/20 dark:border-red-500/25">
                       {stats.removed > 0 && <span>−{stats.removed}</span>}
-                      {stats.removed > 0 && stats.modified > 0 && <span style={{ opacity: 0.4 }}>·</span>}
-                      {stats.modified > 0 && <span>~{stats.modified}</span>}
+                      {stats.removed > 0 && stats.modified > 0 && <span className="opacity-40">·</span>}
+                      {stats.modified > 0 && <span className="text-amber-600 dark:text-amber-400">~{stats.modified}</span>}
                     </span>
                   )}
                 </div>
-                <div className="py-2 font-mono text-xs overflow-auto" style={{ lineHeight: 1.65 }}>
+                <div className="py-2 font-mono text-xs overflow-auto leading-[1.65]">
                   <JsonLine
                     value={parsedDiffLeft} path="$" indent={0}
                     diffMap={leftDiffMap} parentPaths={parentPaths} isLast={true}
@@ -370,20 +360,18 @@ export default function JsonDiff() {
               </div>
 
               {/* Right panel */}
-              <div>
-                <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 border-b"
-                  style={{ background: 'rgba(7,9,26,0.96)', borderColor: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(8px)' }}>
-                  <span className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.5)' }}>Modified</span>
+              <div className="relative">
+                <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 border-b border-border/60 bg-card/90 dark:bg-[#07091a]/96 backdrop-blur-md">
+                  <span className="text-xs font-semibold text-muted-foreground">Modified</span>
                   {stats && (stats.added + stats.modified) > 0 && (
-                    <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-semibold"
-                      style={{ background: 'rgba(52,211,153,0.15)', color: '#34d399', border: '1px solid rgba(52,211,153,0.25)' }}>
+                    <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-semibold bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 dark:border-emerald-500/25">
                       {stats.added > 0 && <span>+{stats.added}</span>}
-                      {stats.added > 0 && stats.modified > 0 && <span style={{ opacity: 0.4 }}>·</span>}
-                      {stats.modified > 0 && <span>~{stats.modified}</span>}
+                      {stats.added > 0 && stats.modified > 0 && <span className="opacity-40">·</span>}
+                      {stats.modified > 0 && <span className="text-amber-600 dark:text-amber-400">~{stats.modified}</span>}
                     </span>
                   )}
                 </div>
-                <div className="py-2 font-mono text-xs overflow-auto" style={{ lineHeight: 1.65 }}>
+                <div className="py-2 font-mono text-xs overflow-auto leading-[1.65]">
                   <JsonLine
                     value={parsedDiffRight} path="$" indent={0}
                     diffMap={rightDiffMap} parentPaths={parentPaths} isLast={true}
@@ -395,18 +383,17 @@ export default function JsonDiff() {
             {/* ── Changes list ── */}
             {diffs.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center"
-                  style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.3)' }}>
-                  <Check className="w-6 h-6" style={{ color: '#34d399' }} />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-emerald-500/15 border border-emerald-500/30">
+                  <Check className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <p className="text-sm font-semibold" style={{ color: '#34d399' }}>Identical JSON</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>Both objects have exactly the same structure and values</p>
+                <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Identical JSON</p>
+                <p className="text-xs text-muted-foreground/60 dark:text-white/30">Both objects have exactly the same structure and values</p>
               </div>
             ) : (
               <div className="p-4 space-y-3">
                 {/* Filter bar */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.4)' }}>Changes</span>
+                  <span className="text-xs font-semibold text-muted-foreground/70 dark:text-white/40">Changes</span>
                   {(['all', 'added', 'removed', 'modified'] as const).map(f => {
                     const count = f === 'all' ? stats?.total : stats?.[f];
                     const active = filter === f;
@@ -415,11 +402,11 @@ export default function JsonDiff() {
                       <button
                         key={f}
                         onClick={() => setFilter(f)}
-                        className="px-2.5 py-1 rounded-lg text-xs font-semibold transition-all"
-                        style={active
-                          ? { background: cfg ? cfg.badgeBg : 'rgba(129,140,248,0.2)', color: cfg ? cfg.clr : '#a5b4fc', border: `1px solid ${cfg ? cfg.border + '60' : 'rgba(129,140,248,0.4)'}` }
-                          : { color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)', background: 'transparent' }
-                        }
+                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                          active 
+                            ? (cfg ? `border ${cfg.badgeClass}` : 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-500/40')
+                            : 'bg-transparent text-muted-foreground/60 dark:text-white/35 border-border/50 dark:border-white/10 hover:bg-muted/50'
+                        }`}
                       >
                         {f === 'all' ? 'All' : cfg?.sign} {count}
                       </button>
@@ -434,46 +421,37 @@ export default function JsonDiff() {
                     return (
                       <div
                         key={i}
-                        className="diff-entry-card flex items-start gap-3 rounded-xl p-3"
-                        style={{
-                          background: cfg.bg,
-                          border: `1px solid ${cfg.border}22`,
-                          borderLeft: `3px solid ${cfg.border}`,
-                          animationDelay: `${i * 30}ms`,
-                        }}
+                        className={`diff-entry-card flex items-start gap-3 rounded-xl p-3 border-l-[3px] border-r-border border-t-border border-b-border dark:border-r-white/5 dark:border-t-white/5 dark:border-b-white/5 ${cfg.borderClass} ${cfg.bgClass}`}
+                        style={{ animationDelay: `${i * 30}ms` }}
                       >
                         {/* Sign badge */}
-                        <span className="flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black mt-0.5"
-                          style={{ background: `${cfg.border}25`, color: cfg.clr }}>
+                        <span className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black mt-0.5 bg-background dark:bg-black/20 ${cfg.clrClass} border border-border/30 dark:border-white/5 shadow-sm`}>
                           {cfg.sign}
                         </span>
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                            <code className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                            <code className="text-xs font-bold text-foreground/90 dark:text-white/85">
                               {entry.path}
                             </code>
-                            <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
-                              style={{ background: cfg.badgeBg, color: cfg.clr }}>
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-semibold border ${cfg.badgeClass}`}>
                               {cfg.label}
                             </span>
                           </div>
 
                           <div className="flex items-center gap-2 font-mono text-xs flex-wrap">
                             {entry.type !== 'added' && (
-                              <span className="px-2 py-0.5 rounded-md"
-                                style={{ background: 'rgba(248,113,113,0.12)', color: '#fca5a5', border: '1px solid rgba(248,113,113,0.2)' }}>
+                              <span className="px-2 py-0.5 rounded-md bg-red-500/10 dark:bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/20 dark:border-red-500/30">
                                 {JSON.stringify(entry.oldValue)?.length > 60
                                   ? JSON.stringify(entry.oldValue)?.slice(0, 58) + '…'
                                   : JSON.stringify(entry.oldValue)}
                               </span>
                             )}
                             {entry.type === 'modified' && (
-                              <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 14 }}>→</span>
+                              <span className="text-muted-foreground/40 dark:text-white/25 text-[14px]">→</span>
                             )}
                             {entry.type !== 'removed' && (
-                              <span className="px-2 py-0.5 rounded-md"
-                                style={{ background: 'rgba(52,211,153,0.12)', color: '#86efac', border: '1px solid rgba(52,211,153,0.2)' }}>
+                              <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 dark:border-emerald-500/30">
                                 {JSON.stringify(entry.newValue)?.length > 60
                                   ? JSON.stringify(entry.newValue)?.slice(0, 58) + '…'
                                   : JSON.stringify(entry.newValue)}
