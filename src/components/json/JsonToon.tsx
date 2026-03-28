@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback, Fragment } from 'react';
 import { useJsonStore } from '@/stores/jsonStore';
-import { FileText, Copy, Download, Code2, Sparkles, MoveHorizontal } from 'lucide-react';
+import { FileText, Copy, Download, Code2, Sparkles, MoveHorizontal, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { jsonToToon } from 'toon-parser';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
@@ -263,26 +263,46 @@ export default function JsonToon() {
       </div>
 
       {/* ── Side by Side Workspace ── */}
-      <div className="flex-1 overflow-hidden relative">
+      <div className="flex-1 overflow-hidden relative flex flex-col">
         {toonString.startsWith('Error') ? (
           <div className="p-4 text-red-400 text-sm font-mono whitespace-pre-wrap">{toonString}</div>
         ) : (
-          <PanelGroup direction="horizontal">
-            <Panel defaultSize={45} minSize={20}>
-              <HighlightedJson jsonString={jsonString} />
-            </Panel>
-            
-            <PanelResizeHandle className="w-2 relative group cursor-col-resize flex flex-col justify-center">
-              <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-border/40 group-hover:bg-fuchsia-500/50 transition-colors" />
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-card border border-border shadow-sm w-4 h-6 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                <MoveHorizontal className="w-2.5 h-2.5 text-muted-foreground" />
+          <>
+            {/* ── Info Banner ── */}
+            <div className="mx-3 mt-3 px-4 py-3 bg-fuchsia-500/5 rounded-xl border border-fuchsia-500/15 flex gap-3 text-sm shadow-sm shrink-0">
+              <div className="shrink-0 pt-0.5">
+                <Info className="w-4 h-4 text-fuchsia-400/80" />
               </div>
-            </PanelResizeHandle>
+              <div className="text-muted-foreground/90 space-y-1 leading-relaxed">
+                <p>
+                  <strong className="text-foreground/90 font-medium tracking-wide mr-1 shadow-sm">Token-Oriented Object Notation (TOON)</strong>
+                  is a lightweight data format explicitly optimized for Large Language Models (LLMs).
+                </p>
+                <p className="text-[12px] opacity-80">
+                  By stripping out standard JSON syntactic noise (quotes, curly braces) and using tabular structures for arrays, TOON drastically reduces the <strong className="font-semibold text-foreground">token count</strong>. This lowers API costs and preserves valuable context-window space while remaining 100% reversible back to JSON.
+                </p>
+              </div>
+            </div>
             
-            <Panel defaultSize={55} minSize={20}>
-              <HighlightedToon toonString={toonString} />
-            </Panel>
-          </PanelGroup>
+            <div className="flex-1 min-h-0 relative">
+              <PanelGroup direction="horizontal">
+                <Panel defaultSize={45} minSize={20}>
+                  <HighlightedJson jsonString={jsonString} />
+                </Panel>
+                
+                <PanelResizeHandle className="w-2 relative group cursor-col-resize flex flex-col justify-center">
+                  <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-border/40 group-hover:bg-fuchsia-500/50 transition-colors" />
+                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-card border border-border shadow-sm w-4 h-6 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                    <MoveHorizontal className="w-2.5 h-2.5 text-muted-foreground" />
+                  </div>
+                </PanelResizeHandle>
+                
+                <Panel defaultSize={55} minSize={20}>
+                  <HighlightedToon toonString={toonString} />
+                </Panel>
+              </PanelGroup>
+            </div>
+          </>
         )}
       </div>
     </div>
