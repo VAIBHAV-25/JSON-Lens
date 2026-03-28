@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type JsonTab = 'viewer' | 'graph' | 'diff' | 'schema' | 'types' | 'flatten';
+export type JsonTab = 'viewer' | 'graph' | 'diff' | 'schema' | 'types' | 'flatten' | 'toon';
 
 const WORKSPACE_STORAGE_KEY = 'json-lens-workspace-v1';
 const MAX_RECENT_ITEMS = 10;

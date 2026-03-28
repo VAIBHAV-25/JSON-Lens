@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Keyboard,
+  FileText,
 } from "lucide-react";
 
 import { useState, useEffect, lazy, Suspense, useMemo } from "react";
@@ -23,6 +24,7 @@ const JsonGraph   = lazy(() => import("@/components/json/JsonGraph"));
 const JsonSchema  = lazy(() => import("@/components/json/JsonSchema"));
 const JsonTypes   = lazy(() => import("@/components/json/JsonTypes"));
 const JsonFlatten = lazy(() => import("@/components/json/JsonFlatten"));
+const JsonToon    = lazy(() => import("@/components/json/JsonToon"));
 
 interface TabDef {
   id: JsonTab;
@@ -74,6 +76,13 @@ const TABS: TabDef[] = [
     icon: List,
     gradient: "from-cyan-500 to-sky-500",
     ring: "ring-cyan-500/40",
+  },
+  {
+    id: "toon",
+    label: "TOON",
+    icon: FileText,
+    gradient: "from-fuchsia-500 to-pink-500",
+    ring: "ring-fuchsia-500/40",
   },
 ];
 
@@ -214,6 +223,7 @@ export default function Index() {
               ["⌘ 4", "Schema"],
               ["⌘ 5", "Types"],
               ["⌘ 6", "Flatten"],
+              ["⌘ 7", "TOON"],
               ["⌘ ?", "Toggle shortcuts"],
             ].map(([key, desc]) => (
               <div
@@ -268,6 +278,11 @@ export default function Index() {
         {activeTab === "flatten" && (
           <Suspense fallback={<TabSkeleton />}>
             <JsonFlatten />
+          </Suspense>
+        )}
+        {activeTab === "toon" && (
+          <Suspense fallback={<TabSkeleton />}>
+            <JsonToon />
           </Suspense>
         )}
       </main>
