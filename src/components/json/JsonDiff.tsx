@@ -215,7 +215,7 @@ export default function JsonDiff() {
     <div className="flex flex-col h-full bg-background dark:bg-[#07091a]">
 
       {/* ── Header ── */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/60 shrink-0 bg-indigo-50/50 dark:bg-gradient-to-br dark:from-indigo-500/10 dark:to-sky-500/5">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/60 shrink-0 bg-indigo-50/50 dark:bg-transparent dark:bg-gradient-to-br dark:from-indigo-500/10 dark:to-sky-500/5">
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-indigo-100 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-400/50 shadow-sm dark:shadow-[0_0_12px_rgba(129,140,248,0.2)]">
             <GitCompare className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
