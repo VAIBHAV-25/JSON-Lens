@@ -69,6 +69,17 @@ View the entire JSON as a searchable flat table of `$.path → value` pairs.
 - Live search across paths and values
 - Copy individual rows, copy all as flat JSON or `.env` style, or download as `.txt`
 
+### TOON
+
+Serialize JSON into Token-Oriented Object Notation (TOON) — a compact format specifically optimized to reduce API costs when used in LLM prompts.
+
+- Side-by-side comparison of standard JSON vs TOON format
+- Drastically reduces token count by removing JSON structural noise (quotes, redundant keys, brackets)
+- Live, visual token-reduction metrics
+- Dynamic syntax highlighting that adapts flawlessly to both Light and Dark mode
+- 100% reversible back to standard JSON
+- Copy or download the `.toon` format directly
+
 ### Transforms
 
 Common cleanup and reshaping operations:
@@ -88,6 +99,7 @@ Common cleanup and reshaping operations:
 | `Cmd/Ctrl + 4` | Schema |
 | `Cmd/Ctrl + 5` | Types |
 | `Cmd/Ctrl + 6` | Flatten |
+| `Cmd/Ctrl + 7` | TOON |
 | `Cmd/Ctrl + ?` | Toggle shortcut reference |
 
 ## Tech Stack

@@ -32,6 +32,7 @@ interface TabDef {
   icon: typeof Braces;
   gradient: string;
   ring: string;
+  badge?: string;
 }
 
 const TABS: TabDef[] = [
@@ -83,6 +84,7 @@ const TABS: TabDef[] = [
     icon: FileText,
     gradient: "from-fuchsia-500 to-pink-500",
     ring: "ring-fuchsia-500/40",
+    badge: "New"
   },
 ];
 
@@ -174,7 +176,7 @@ export default function Index() {
 
         {/* Tabs */}
         <nav className="flex items-center gap-0.5 p-0.5 rounded-xl bg-muted/50 border border-border/40 flex-shrink-0">
-          {TABS.map(({ id, label, icon: Icon, gradient, ring }) => (
+          {TABS.map(({ id, label, icon: Icon, gradient, ring, badge }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
@@ -185,7 +187,18 @@ export default function Index() {
               }`}
             >
               <Icon className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="hidden sm:inline">{label}</span>
+              <div className="hidden sm:flex items-center gap-1.5">
+                <span>{label}</span>
+                {badge && (
+                  <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest ${
+                    activeTab === id 
+                      ? "bg-white/20 text-white" 
+                      : "bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 border border-fuchsia-500/20 shadow-sm"
+                  }`}>
+                    {badge}
+                  </span>
+                )}
+              </div>
             </button>
           ))}
         </nav>
